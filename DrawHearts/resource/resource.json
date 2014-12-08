@@ -1,7 +1,7 @@
 {
 "resources":
 	[
-		{"name":"bgImage","type":"image","url":"assets/bg.jpg"},
+		{"name":"bgImage","type":"image","url":"assets/background.jpg"},
 		{"name":"egretIcon","type":"image","url":"assets/egret_icon.png"},
         {"name":"description","type":"json","url":"config/description.json"}
 	],

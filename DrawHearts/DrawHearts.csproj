@@ -125,7 +125,7 @@
     <Content Include="libs\core\extension\resource\events\ResourceEvent.js" />
     <Content Include="libs\core\extension\resource\Resource.js" />
     <Content Include="libs\core\jslib\NumberUtils.js" />
-    <Content Include="resource\assets\bg.jpg" />
+    <Content Include="resource\assets\background.jpg" />
     <Content Include="resource\assets\egret_icon.png" />
     <Content Include="web.config" />
   </ItemGroup>
@@ -150,6 +150,9 @@
     <TypeScriptCompile Include="libs\_references.ts" />
     <TypeScriptCompile Include="src\LoadingUI.ts" />
     <TypeScriptCompile Include="src\Main.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="resource\sounds\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
