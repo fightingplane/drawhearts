@@ -3,11 +3,13 @@
 	[
 		{"name":"bgImage","type":"image","url":"assets/background.jpg"},
 		{"name":"egretIcon","type":"image","url":"assets/egret_icon.png"},
-        {"name":"description","type":"json","url":"config/description.json"}
+        {"name": "description", "type": "json", "url": "config/description.json"},
+        {"name":  "sound", "type": "sound", "url": "sounds/bg_music.mp3"}
 	],
 
 "groups":
 	[
-        {"name":"preload","keys":"bgImage,egretIcon"}
+        { "name": "preload", "keys": "bgImage,egretIcon" },
+        { "name": "soundload", "key": "sound"}
 	]
 }

@@ -31,6 +31,7 @@ class Main extends egret.DisplayObjectContainer{
      * 加载进度界面
      */
     private loadingView:LoadingUI;
+    private bgSound: egret.Sound;
 
     public constructor() {
         super();
@@ -54,6 +55,7 @@ class Main extends egret.DisplayObjectContainer{
         RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onResourceLoadComplete,this);
         RES.addEventListener(RES.ResourceEvent.GROUP_PROGRESS,this.onResourceProgress,this);
         RES.loadGroup("preload");
+        RES.loadGroup("soundload");
     }
     /**
      * preload资源组加载完成
@@ -64,7 +66,16 @@ class Main extends egret.DisplayObjectContainer{
             RES.removeEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onResourceLoadComplete,this);
             RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS,this.onResourceProgress,this);
             this.createGameScene();
+            this.bgSound = RES.getRes("sound");
+            this.bgSound.play();
+            this.bgSound.addEventListener("ended", this.rePlay.bind(this));
         }
+    }
+
+    private rePlay(): void
+    {
+        this.bgSound.load();
+        this.bgSound.play();
     }
     /**
      * preload资源组加载进度
