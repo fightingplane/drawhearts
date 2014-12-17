@@ -33,6 +33,7 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
+     * @extends egret.DisplayObject
      * @class egret.DisplayObjectContainer
      * @classdesc
      * DisplayObjectContainer 类是可用作显示列表中显示对象容器的所有对象的基类。

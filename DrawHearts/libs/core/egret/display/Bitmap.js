@@ -45,11 +45,13 @@ var egret;
             /**
              * 单个Bitmap是否开启DEBUG模式
              * @member {boolean} egret.Bitmap#debug
+             * @private
              */
             this.debug = false;
             /**
              * debug边框颜色，默认值为红色
              * @member {number} egret.Bitmap#debugColor
+             * @private
              */
             this.debugColor = 0xff0000;
             /**
@@ -222,6 +224,7 @@ var egret;
         /**
          * 全部Bitmap是否开启DEBUG模式
          * @member {boolean} egret.Bitmap.debug
+         * @private
          */
         Bitmap.debug = false;
         Bitmap.renderFilter = egret.RenderFilter.getInstance();

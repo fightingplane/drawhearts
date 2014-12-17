@@ -36,6 +36,7 @@ var egret;
      * @class egret.HTML5NetContext
      * @classdesc
      * @extends egret.NetContext
+     * @private
      */
     var HTML5NetContext = (function (_super) {
         __extends(HTML5NetContext, _super);

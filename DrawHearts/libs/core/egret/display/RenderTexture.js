@@ -53,12 +53,20 @@ var egret;
         RenderTexture.prototype.drawToTexture = function (displayObject) {
             var cacheCanvas = this._bitmapData;
             var bounds = displayObject.getBounds(egret.Rectangle.identity);
+            if (bounds.width == 0 || bounds.height == 0) {
+                egret.Logger.warning("egret.RenderTexture#drawToTexture:显示对象测量结果宽高为0，请检查");
+                return false;
+            }
+            bounds.width = Math.floor(bounds.width);
+            bounds.height = Math.floor(bounds.height);
             cacheCanvas.width = bounds.width;
             cacheCanvas.height = bounds.height;
             if (this.renderContext._cacheCanvas) {
                 this.renderContext._cacheCanvas.width = bounds.width;
                 this.renderContext._cacheCanvas.height = bounds.height;
             }
+            RenderTexture.identityRectangle.width = bounds.width;
+            RenderTexture.identityRectangle.height = bounds.height;
             displayObject._worldTransform.identity();
             displayObject.worldAlpha = 1;
             if (displayObject instanceof egret.DisplayObjectContainer) {
@@ -91,17 +99,20 @@ var egret;
             if (mask) {
                 this.renderContext.popMask();
             }
-            renderFilter._drawAreaList = drawAreaList;
+            renderFilter.addDrawArea(RenderTexture.identityRectangle);
             this.renderContext.onRenderFinish();
+            renderFilter._drawAreaList = drawAreaList;
             this._textureWidth = this._bitmapData.width;
             this._textureHeight = this._bitmapData.height;
             this._sourceWidth = this._textureWidth;
             this._sourceHeight = this._textureHeight;
+            return true;
             //测试代码
             //            this.renderContext.canvasContext.setTransform(1, 0, 0, 1, 0, 0);
             //            this.renderContext.strokeRect(0, 0,cacheCanvas.width,cacheCanvas.height,"#ff0000");
             //            document.documentElement.appendChild(cacheCanvas);
         };
+        RenderTexture.identityRectangle = new egret.Rectangle();
         return RenderTexture;
     })(egret.Texture);
     egret.RenderTexture = RenderTexture;

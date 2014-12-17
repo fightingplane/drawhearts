@@ -33,7 +33,6 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.Scroller
      * @classdesc
      * egret.Scroller已废弃，请使用egret.ScrollView
      * @extends egret.DisplayObject

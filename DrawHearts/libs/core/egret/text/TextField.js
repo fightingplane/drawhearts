@@ -120,6 +120,8 @@ var egret;
              * @private
              */
             this._maxChars = 0;
+            this._scrollV = -1;
+            this._maxScrollV = 0;
             /**
              * 行间距
              * 一个整数，表示行与行之间的垂直间距量。
@@ -139,8 +141,11 @@ var egret;
              * @member {boolean} egret.TextField#multiline
              */
             this._multiline = false;
+            this._isFlow = false;
             this._textArr = [];
             this._isArrayChanged = false;
+            this._textMaxWidth = 0; //文本全部显示时宽
+            this._textMaxHeight = 0; //文本全部显示时高（无行间距）
             this._linesArr = [];
         }
         TextField.prototype.isInput = function () {
@@ -206,6 +211,10 @@ var egret;
             }
             return this._text;
         };
+        TextField.prototype._setSizeDirty = function () {
+            _super.prototype._setSizeDirty.call(this);
+            this._isArrayChanged = true;
+        };
         TextField.prototype._setTextDirty = function () {
             this._setSizeDirty();
         };
@@ -213,27 +222,18 @@ var egret;
             if (value == null) {
                 value = "";
             }
+            this._isFlow = false;
             if (this._text != value || this._displayAsPassword) {
                 this._setTextDirty();
                 this._text = value;
                 var text = "";
                 if (this._displayAsPassword) {
-                    for (var i = 0, num = this._text.length; i < num; i++) {
-                        switch (this._text.charAt(i)) {
-                            case '\n':
-                                text += "\n";
-                                break;
-                            case '\r':
-                                break;
-                            default:
-                                text += '*';
-                        }
-                    }
+                    text = this.changeToPassText(this._text);
                 }
                 else {
                     text = this._text;
                 }
-                this.setMiddleStyle([[text]]);
+                this.setMiddleStyle([{ text: text }]);
             }
         };
         TextField.prototype._setText = function (value) {
@@ -422,9 +422,17 @@ var egret;
                 this._maxChars = value;
             }
         };
+        Object.defineProperty(TextField.prototype, "scrollV", {
+            set: function (value) {
+                this._scrollV = value;
+                this._setDirty();
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(TextField.prototype, "maxScrollV", {
             get: function () {
-                return this._numLines;
+                return this._maxScrollV;
             },
             enumerable: true,
             configurable: true
@@ -530,31 +538,37 @@ var egret;
          * @param renderContext
          */
         TextField.prototype._render = function (renderContext) {
-            this.drawText(renderContext, false);
+            this.drawText(renderContext);
             this._clearDirty();
         };
         /**
          * 测量显示对象坐标与大小
          */
         TextField.prototype._measureBounds = function () {
-            var renderContext = egret.MainContext.instance.rendererContext;
-            return this.drawText(renderContext, true);
+            return this.measureText();
         };
-        /**
-         *
-         * @param textArr [["text1", {"color":0xffffff}], ["text2", {"color":0xff0000}]]
-         * @private
-         */
-        TextField.prototype._setTextArray = function (textArr) {
-            var text = "";
-            for (var i = 0; i < textArr.length; i++) {
-                text += textArr[i][0];
-                textArr[i][0] = this.changeToPassText(textArr[i][0]);
-            }
-            this._text = text;
-            this.setMiddleStyle(textArr);
-            this._setSizeDirty();
-        };
+        Object.defineProperty(TextField.prototype, "textFlow", {
+            /**
+             *
+             */
+            set: function (textArr) {
+                this._isFlow = true;
+                var text = "";
+                for (var i = 0; i < textArr.length; i++) {
+                    var element = textArr[i];
+                    text += element.text;
+                }
+                if (this._displayAsPassword) {
+                    this._setBaseText(text);
+                }
+                else {
+                    this._text = text;
+                    this.setMiddleStyle(textArr);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         TextField.prototype.changeToPassText = function (text) {
             if (this._displayAsPassword) {
                 var passText = "";
@@ -576,6 +590,28 @@ var egret;
         TextField.prototype.setMiddleStyle = function (textArr) {
             this._isArrayChanged = true;
             this._textArr = textArr;
+            this._setSizeDirty();
+        };
+        Object.defineProperty(TextField.prototype, "textWidth", {
+            get: function () {
+                return this._textMaxWidth;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TextField.prototype, "textHeight", {
+            get: function () {
+                return this._textMaxHeight;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TextField.prototype.appendText = function (text) {
+            this.appendElement({ text: text });
+        };
+        TextField.prototype.appendElement = function (element) {
+            this._textArr.push(element);
+            this.setMiddleStyle(this._textArr);
         };
         TextField.prototype._getLinesArr = function () {
             if (!this._isArrayChanged) {
@@ -585,97 +621,131 @@ var egret;
             var text2Arr = this._textArr;
             var renderContext = egret.MainContext.instance.rendererContext;
             this._linesArr = [];
+            this._textMaxHeight = 0;
+            this._textMaxWidth = 0;
             var linesArr = this._linesArr;
             var lineW = 0;
             var lineH = 0;
             var lineCount = 0;
+            var lineElement;
+            if (!this._isFlow) {
+                renderContext.setupFont(this);
+            }
             for (var i = 0; i < text2Arr.length; i++) {
-                var textInfo = text2Arr[i];
-                textInfo[1] = textInfo[1] || {};
-                lineH = Math.max(lineH, textInfo[1]["size"] || this._size);
-                var text = textInfo[0].toString();
+                var element = text2Arr[i];
+                element.style = element.style || {};
+                var text = element.text.toString();
                 var textArr = text.split(/(?:\r\n|\r|\n)/);
                 for (var j = 0; j < textArr.length; j++) {
                     if (linesArr[lineCount] == null) {
-                        linesArr[lineCount] = [];
+                        lineElement = { width: 0, height: 0, elements: [] };
+                        linesArr[lineCount] = lineElement;
                         lineW = 0;
+                        lineH = 0;
                     }
-                    renderContext.setupFont(this);
-                    var w = renderContext.measureText(textArr[j]);
-                    if (!this._hasWidthSet) {
-                        lineW += w;
-                        linesArr[lineCount].push([textArr[j], textInfo[1], w]);
+                    if (this._type == egret.TextFieldType.INPUT) {
+                        lineH = this._size;
                     }
                     else {
-                        if (lineW + w < this._explicitWidth) {
-                            linesArr[lineCount].push([textArr[j], textInfo[1], w]);
+                        lineH = Math.max(lineH, element.style.size || this._size);
+                    }
+                    if (textArr[j] == "") {
+                    }
+                    else {
+                        if (this._isFlow) {
+                            renderContext.setupFont(this, element.style);
+                        }
+                        var w = renderContext.measureText(textArr[j]);
+                        if (!this._hasWidthSet) {
                             lineW += w;
+                            lineElement.elements.push({ width: w, text: textArr[j], style: element.style });
                         }
                         else {
-                            var k = 0;
-                            var ww = 0;
-                            var word = textArr[j];
-                            for (; k < word.length; k++) {
-                                w = renderContext.measureText(word.charAt(k));
-                                if (lineW + w > this._explicitWidth) {
-                                    break;
-                                }
-                                ww += w;
+                            if (lineW + w <= this._explicitWidth) {
+                                lineElement.elements.push({ width: w, text: textArr[j], style: element.style });
                                 lineW += w;
                             }
-                            if (k > 0) {
-                                linesArr[lineCount].push([word.substring(0, k), textInfo[1], ww]);
-                                textArr[j] = word.substring(k);
+                            else {
+                                var k = 0;
+                                var ww = 0;
+                                var word = textArr[j];
+                                for (; k < word.length; k++) {
+                                    w = renderContext.measureText(word.charAt(k));
+                                    if (lineW + w > this._explicitWidth) {
+                                        break;
+                                    }
+                                    ww += w;
+                                    lineW += w;
+                                }
+                                if (k > 0) {
+                                    lineElement.elements.push({ width: ww, text: word.substring(0, k), style: element.style });
+                                    textArr[j] = word.substring(k);
+                                }
+                                j--;
                             }
-                            j--;
                         }
                     }
                     if (j < textArr.length - 1) {
-                        linesArr[lineCount].push([lineW, lineH]);
+                        lineElement.width = lineW;
+                        lineElement.height = lineH;
+                        this._textMaxWidth = Math.max(this._textMaxWidth, lineW);
+                        this._textMaxHeight += lineH;
                         if (this._type == egret.TextFieldType.INPUT && !this._multiline) {
+                            this._numLines = linesArr.length;
                             return linesArr;
                         }
                         lineCount++;
                     }
                 }
-                if (i == text2Arr.length - 1) {
-                    linesArr[lineCount].push([lineW, lineH]);
+                if (i == text2Arr.length - 1 && lineElement) {
+                    lineElement.width = lineW;
+                    lineElement.height = lineH;
+                    this._textMaxWidth = Math.max(this._textMaxWidth, lineW);
+                    this._textMaxHeight += lineH;
                 }
             }
+            this._numLines = linesArr.length;
             return linesArr;
+        };
+        TextField.prototype.measureText = function () {
+            var lines = this._getLinesArr();
+            if (!lines) {
+                return egret.Rectangle.identity.initialize(0, 0, 0, 0);
+            }
+            var maxWidth = this._hasWidthSet ? this._explicitWidth : this._textMaxWidth;
+            var maxHeight = this._hasHeightSet ? this._explicitHeight : this._textMaxHeight + (this._numLines - 1) * this._lineSpacing;
+            return egret.Rectangle.identity.initialize(0, 0, maxWidth, maxHeight);
         };
         /**
          * @private
          * @param renderContext
          * @returns {Rectangle}
          */
-        TextField.prototype.drawText = function (renderContext, forMeasure) {
+        TextField.prototype.drawText = function (renderContext) {
             var lines = this._getLinesArr();
-            renderContext.setupFont(this);
             if (!lines) {
-                return egret.Rectangle.identity.initialize(0, 0, 0, 0);
+                return;
             }
-            var length = lines.length;
-            var drawY = this._size * 0.5;
-            var textHeight = 0;
-            var maxWidth = 0;
-            for (var i = 0; i < lines.length; i++) {
-                var lineArr = lines[i];
-                textHeight += lineArr[lineArr.length - 1][1];
-                maxWidth = Math.max(lineArr[lineArr.length - 1][0], maxWidth);
+            if (!this._isFlow) {
+                renderContext.setupFont(this);
             }
-            textHeight += (length - 1) * this._lineSpacing;
-            if (this._hasWidthSet) {
-                maxWidth = this._explicitWidth;
-            }
-            var explicitHeight = this._hasHeightSet ? this._explicitHeight : Number.POSITIVE_INFINITY;
-            if (this._hasHeightSet && textHeight < explicitHeight) {
-                var valign = 0;
-                if (this._verticalAlign == egret.VerticalAlign.MIDDLE)
-                    valign = 0.5;
-                else if (this._verticalAlign == egret.VerticalAlign.BOTTOM)
-                    valign = 1;
-                drawY += valign * (explicitHeight - textHeight);
+            var maxWidth = this._hasWidthSet ? this._explicitWidth : this._textMaxWidth;
+            var textHeight = this._textMaxHeight + (this._numLines - 1) * this._lineSpacing;
+            var drawY = 0;
+            var startLine = 0;
+            if (this._hasHeightSet) {
+                if (textHeight < this._explicitHeight) {
+                    var valign = 0;
+                    if (this._verticalAlign == egret.VerticalAlign.MIDDLE)
+                        valign = 0.5;
+                    else if (this._verticalAlign == egret.VerticalAlign.BOTTOM)
+                        valign = 1;
+                    drawY += valign * (this._explicitHeight - textHeight);
+                }
+                else if (textHeight > this._explicitHeight) {
+                    startLine = Math.max(this._scrollV - 1, 0);
+                    startLine = Math.min(this._numLines - 1, startLine);
+                }
             }
             drawY = Math.round(drawY);
             var halign = 0;
@@ -686,26 +756,30 @@ var egret;
                 halign = 1;
             }
             var drawX = 0;
-            for (var i = 0; i < length; i++) {
-                var lineArr = lines[i];
-                drawX = Math.round((maxWidth - lineArr[lineArr.length - 1][0]) * halign);
-                for (var j = 0; j < lineArr.length - 1; j++) {
-                    if (!forMeasure) {
-                        if (this._type == egret.TextFieldType.INPUT) {
-                            renderContext.drawText(this, lineArr[j][0], drawX, drawY, lineArr[j][2], {});
-                        }
-                        else {
-                            renderContext.drawText(this, lineArr[j][0], drawX, drawY, lineArr[j][2], lineArr[j][1]);
-                        }
-                    }
-                    drawX += lineArr[j][2];
-                }
-                drawY += lineArr[lineArr.length - 1][1] + this._lineSpacing;
-                if (this._hasHeightSet && drawY - this._size * 0.5 > this._explicitHeight) {
+            for (var i = startLine; i < this._numLines; i++) {
+                var line = lines[i];
+                var h = line.height;
+                drawY += h / 2;
+                if (i != 0 && this._hasHeightSet && drawY > this._explicitHeight) {
                     break;
                 }
+                drawX = Math.round((maxWidth - line.width) * halign);
+                for (var j = 0; j < line.elements.length; j++) {
+                    var element = line.elements[j];
+                    var size = element.style.size || this._size;
+                    if (this._type == egret.TextFieldType.INPUT) {
+                        renderContext.drawText(this, element.text, drawX, drawY + (h - size) / 2, element.width);
+                    }
+                    else {
+                        if (this._isFlow) {
+                            renderContext.setupFont(this, element.style);
+                        }
+                        renderContext.drawText(this, element.text, drawX, drawY + (h - size) / 2, element.width, element.style);
+                    }
+                    drawX += element.width;
+                }
+                drawY += h / 2 + this._lineSpacing;
             }
-            return egret.Rectangle.identity.initialize(0, 0, maxWidth, textHeight);
         };
         TextField.default_fontFamily = "Arial";
         return TextField;

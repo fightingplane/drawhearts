@@ -33,9 +33,9 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.StageText
      * @classdesc
-     * @extends egret.HashObject
+     * @extends egret.StageText
+     * @private
      */
     var HTML5StageText = (function (_super) {
         __extends(HTML5StageText, _super);
@@ -95,9 +95,6 @@ var egret;
                 this.getStageDelegateDiv().appendChild(this.div);
             }
         };
-        /**
-         * @method egret.StageText#remove
-         */
         HTML5StageText.prototype._remove = function () {
             if (this._shape && this._shape.parent) {
                 this._shape.parent.removeChild(this._shape);
@@ -154,13 +151,6 @@ var egret;
             this.setElementStyle("wordBreak", "break-all");
             this.setElementStyle("overflow", "hidden");
         };
-        /**
-         * @method egret.StageText#open
-         * @param x {number}
-         * @param y {number}
-         * @param width {number}
-         * @param height {number}
-         */
         HTML5StageText.prototype._open = function (x, y, width, height) {
             if (width === void 0) { width = 160; }
             if (height === void 0) { height = 21; }
@@ -196,11 +186,13 @@ var egret;
             this.setElementStyle("border", "1px solid red");
             this.setElementStyle("display", "block");
         };
-        /**
-         * @method egret.StageText#add
-         */
         HTML5StageText.prototype._show = function () {
-            this.inputElement.setAttribute("maxlength", this._maxChars > 0 ? this._maxChars : -1);
+            if (this._maxChars > 0) {
+                this.inputElement.setAttribute("maxlength", this._maxChars);
+            }
+            else {
+                this.inputElement.removeAttribute("maxlength");
+            }
             this._isShow = true;
             //打开
             var txt = this._getText();
@@ -221,6 +213,9 @@ var egret;
             }
         };
         HTML5StageText.prototype._hide = function () {
+            if (this.inputElement == null) {
+                return;
+            }
             this._isShow = false;
             this.inputElement.oninput = function () {
             };
@@ -239,20 +234,12 @@ var egret;
                 this._shape.parent.removeChild(this._shape);
             }
         };
-        /**
-         * @method egret.StageText#getText
-         * @returns {string}
-         */
         HTML5StageText.prototype._getText = function () {
             if (!this.textValue) {
                 this.textValue = "";
             }
             return this.textValue;
         };
-        /**
-         * @method egret.StageText#setText
-         * @param value {string}
-         */
         HTML5StageText.prototype._setText = function (value) {
             this.textValue = value;
             this.resetText();

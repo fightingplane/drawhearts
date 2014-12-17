@@ -36,6 +36,7 @@ var egret;
      * @class egret.HTML5CanvasRenderer
      * @classdesc
      * @extends egret.RendererContext
+     * @private
      */
     var HTML5CanvasRenderer = (function (_super) {
         __extends(HTML5CanvasRenderer, _super);
@@ -52,6 +53,7 @@ var egret;
             this._cacheCanvasContext["webkitImageSmoothingEnabled"] = egret.RendererContext.imageSmoothingEnabled;
             this._cacheCanvasContext["mozImageSmoothingEnabled"] = egret.RendererContext.imageSmoothingEnabled;
             this._cacheCanvasContext["msImageSmoothingEnabled"] = egret.RendererContext.imageSmoothingEnabled;
+            this.onResize();
             var f = this.canvasContext.setTransform;
             var that = this;
             this._cacheCanvasContext.setTransform = function (a, b, c, d, tx, ty) {
@@ -79,14 +81,23 @@ var egret;
                 var container = document.getElementById(egret.StageDelegate.canvas_div_name);
                 canvas = egret.Browser.getInstance().$new("canvas");
                 canvas.id = "egretCanvas";
-                canvas.width = egret.MainContext.instance.stage.stageWidth; //stageW
-                canvas.height = egret.MainContext.instance.stage.stageHeight; //stageH
-                canvas.style.width = container.style.width;
-                canvas.style.height = container.style.height;
-                //                canvas.style.position = "absolute";
                 container.appendChild(canvas);
             }
+            egret.MainContext.instance.stage.addEventListener(egret.Event.RESIZE, this.onResize, this);
             return canvas;
+        };
+        HTML5CanvasRenderer.prototype.onResize = function () {
+            //设置canvas宽高
+            if (this.canvas) {
+                var container = document.getElementById(egret.StageDelegate.canvas_div_name);
+                this.canvas.width = egret.MainContext.instance.stage.stageWidth; //stageW
+                this.canvas.height = egret.MainContext.instance.stage.stageHeight; //stageH
+                this.canvas.style.width = container.style.width;
+                this.canvas.style.height = container.style.height;
+                //              this.canvas.style.position = "absolute";
+                this._cacheCanvas.width = this.canvas.width;
+                this._cacheCanvas.height = this.canvas.height;
+            }
         };
         HTML5CanvasRenderer.prototype.clearScreen = function () {
             var list = egret.RenderFilter.getInstance().getDrawAreaList();
@@ -175,11 +186,17 @@ var egret;
             this.blendModes[egret.BlendMode.NORMAL] = "source-over";
             this.blendModes[egret.BlendMode.ADD] = "lighter";
         };
-        HTML5CanvasRenderer.prototype.setupFont = function (textField) {
+        HTML5CanvasRenderer.prototype.setupFont = function (textField, style) {
+            if (style === void 0) { style = null; }
+            style = style || {};
+            var italic = style["italic"] == null ? textField._italic : style["italic"];
+            var bold = style["bold"] == null ? textField._bold : style["bold"];
+            var size = style["size"] == null ? textField._size : style["size"];
+            var fontFamily = style["fontFamily"] == null ? textField._fontFamily : style["fontFamily"];
             var ctx = this._cacheCanvasContext;
-            var font = textField._italic ? "italic " : "normal ";
-            font += textField._bold ? "bold " : "normal ";
-            font += textField._size + "px " + textField._fontFamily;
+            var font = italic ? "italic " : "normal ";
+            font += bold ? "bold " : "normal ";
+            font += size + "px " + fontFamily;
             ctx.font = font;
             ctx.textAlign = "left";
             ctx.textBaseline = "middle";
@@ -189,23 +206,26 @@ var egret;
             return result.width;
         };
         HTML5CanvasRenderer.prototype.drawText = function (textField, text, x, y, maxWidth, style) {
+            if (style === void 0) { style = null; }
+            this.setupFont(textField, style);
+            style = style || {};
             var textColor;
-            if (style["textColor"]) {
-                textColor = egret.toColorString(parseInt(style["textColor"]));
+            if (style.textColor != null) {
+                textColor = egret.toColorString(style.textColor);
             }
             else {
                 textColor = textField._textColorString;
             }
             var strokeColor;
-            if (style["strokeColor"]) {
-                strokeColor = egret.toColorString(style["strokeColor"]);
+            if (style.strokeColor != null) {
+                strokeColor = egret.toColorString(style.strokeColor);
             }
             else {
                 strokeColor = textField._strokeColorString;
             }
             var outline;
-            if (style["outline"]) {
-                outline = style["outline"];
+            if (style.stroke != null) {
+                outline = style.stroke;
             }
             else {
                 outline = textField._stroke;
@@ -461,7 +481,7 @@ var egret_h5_graphics;
         }
         return Command;
     })();
-    Command.prototype.__class__ = "Command";
+    Command.prototype.__class__ = "egret_h5_graphics.Command";
     function _setStyle(colorStr) {
         this.canvasContext.fillStyle = colorStr;
         this.canvasContext.beginPath();

@@ -62,26 +62,40 @@ var egret;
             set: function (value) {
                 if (this._scaleMode != value) {
                     this._scaleMode = value;
-                    var scaleModeEnum = {};
-                    scaleModeEnum[egret.StageScaleMode.NO_SCALE] = new egret.NoScale();
-                    scaleModeEnum[egret.StageScaleMode.SHOW_ALL] = new egret.ShowAll();
-                    scaleModeEnum[egret.StageScaleMode.NO_BORDER] = new egret.FixedWidth();
-                    scaleModeEnum[egret.StageScaleMode.EXACT_FIT] = new egret.FullScreen();
-                    var content = scaleModeEnum[value];
-                    if (!content) {
-                        throw new Error("使用了尚未实现的ScaleMode");
-                    }
-                    var container = new egret.EqualToFrame();
-                    var policy = new egret.ResolutionPolicy(container, content);
-                    egret.StageDelegate.getInstance()._setResolutionPolicy(policy);
-                    this._stageWidth = egret.StageDelegate.getInstance()._stageWidth;
-                    this._stageHeight = egret.StageDelegate.getInstance()._stageHeight;
-                    this.dispatchEventWith(egret.Event.RESIZE);
+                    this.setResolutionPolicy();
                 }
             },
             enumerable: true,
             configurable: true
         });
+        /**
+         * 当屏幕尺寸改变时调用
+         */
+        Stage.prototype.changeSize = function () {
+            //重新设置屏幕适配策略
+            this.setResolutionPolicy();
+            //触发Event.RESIZE事件
+            this.dispatchEventWith(egret.Event.RESIZE);
+        };
+        /**
+         * 设置屏幕适配策略
+         */
+        Stage.prototype.setResolutionPolicy = function () {
+            var scaleModeEnum = {};
+            scaleModeEnum[egret.StageScaleMode.NO_SCALE] = new egret.NoScale();
+            scaleModeEnum[egret.StageScaleMode.SHOW_ALL] = new egret.ShowAll();
+            scaleModeEnum[egret.StageScaleMode.NO_BORDER] = new egret.FixedWidth();
+            scaleModeEnum[egret.StageScaleMode.EXACT_FIT] = new egret.FullScreen();
+            var content = scaleModeEnum[this._scaleMode];
+            if (!content) {
+                throw new Error("使用了尚未实现的ScaleMode");
+            }
+            var container = new egret.EqualToFrame();
+            var policy = new egret.ResolutionPolicy(container, content);
+            egret.StageDelegate.getInstance()._setResolutionPolicy(policy);
+            this._stageWidth = egret.StageDelegate.getInstance()._stageWidth;
+            this._stageHeight = egret.StageDelegate.getInstance()._stageHeight;
+        };
         Object.defineProperty(Stage.prototype, "stageWidth", {
             /**
              * 舞台宽度（坐标系宽度，非设备宽度）

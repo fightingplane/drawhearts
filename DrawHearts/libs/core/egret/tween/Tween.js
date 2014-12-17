@@ -473,15 +473,18 @@ var egret;
             this.setPosition(this._prevPosition + delta);
         };
         /**
-         * @constant {any} egret.Tween.NONE
+         * 不做特殊处理
+         * @constant {number} egret.Tween.NONE
          */
         Tween.NONE = 0;
         /**
-         * @constant {any} egret.Tween.LOOP
+         * 循环
+         * @constant {number} egret.Tween.LOOP
          */
         Tween.LOOP = 1;
         /**
-         * @constant {any} egret.Tween.REVERSE
+         * 倒序
+         * @constant {number} egret.Tween.REVERSE
          */
         Tween.REVERSE = 2;
         Tween._tweens = [];

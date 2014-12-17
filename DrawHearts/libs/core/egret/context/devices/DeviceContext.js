@@ -33,7 +33,6 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.DeviceContext
      * @classdesc
      * @extends egret.HashObject
      */

@@ -38,6 +38,7 @@ var egret;
      * RenderContext是游戏的渲染上下文。
      * 这是一个抽象基类，制定主要的接口
      * @extends egret.HashObject
+     * @private
      */
     var RendererContext = (function (_super) {
         __extends(RendererContext, _super);
@@ -111,7 +112,8 @@ var egret;
          * @method egret.RendererContext#setupFont
          * @param textField {TextField}
          */
-        RendererContext.prototype.setupFont = function (textField) {
+        RendererContext.prototype.setupFont = function (textField, style) {
+            if (style === void 0) { style = null; }
         };
         /**
          * 测量文本
@@ -133,6 +135,7 @@ var egret;
          * @param maxWidth {numbe}
          */
         RendererContext.prototype.drawText = function (textField, text, x, y, maxWidth, style) {
+            if (style === void 0) { style = null; }
             this.profiler.onDrawImage();
         };
         RendererContext.prototype.strokeRect = function (x, y, w, h, color) {

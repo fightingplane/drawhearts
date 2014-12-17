@@ -117,8 +117,8 @@ var egret;
         /**
          * 获取某一点像素的颜色值
          * @method egret.Texture#getPixel32
-         * @param x 像素点的X轴坐标
-         * @param y 像素点的Y轴坐标
+         * @param x {number} 像素点的X轴坐标
+         * @param y {number} 像素点的Y轴坐标
          * @returns {number} 指定像素点的颜色值
          */
         Texture.prototype.getPixel32 = function (x, y) {

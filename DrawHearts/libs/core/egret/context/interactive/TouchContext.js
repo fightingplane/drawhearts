@@ -36,6 +36,7 @@ var egret;
      *
      * @class egret.TouchContext
      * @classdesc TouchContext是egret的触摸Context
+     * @private
      */
     var TouchContext = (function (_super) {
         __extends(TouchContext, _super);

@@ -42,7 +42,6 @@ var egret;
         __extends(Matrix, _super);
         /**
          * @method egret.Matrix#constructor
-         * @constructor
          * @param a {number} 缩放或旋转图像时影响像素沿 x 轴定位的值。
          * @param b {number} 旋转或倾斜图像时影响像素沿 y 轴定位的值。
          * @param c {number} 旋转或倾斜图像时影响像素沿 x 轴定位的值。
@@ -65,10 +64,6 @@ var egret;
             this.tx = tx;
             this.ty = ty;
         }
-        /**
-         * @member {any} egret.Matrix#
-         */
-        // public methods:
         /**
          * 前置矩阵
          * @method egret.Matrix#prepend
@@ -356,10 +351,6 @@ var egret;
             }
             return this.array;
         };
-        /**
-         * @member {any} egret.Matrix.
-         */
-        // static public properties:
         Matrix.identity = new Matrix();
         Matrix.DEG_TO_RAD = Math.PI / 180;
         return Matrix;

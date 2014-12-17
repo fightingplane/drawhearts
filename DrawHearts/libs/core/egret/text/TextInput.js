@@ -33,7 +33,6 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.TextInput
      * @classdesc
      * TextInput 已废弃，请使用TextField代替，并设置type为TextFieldType.INPUT
      * @extends egret.TextField

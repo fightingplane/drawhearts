@@ -99,14 +99,12 @@ var egret;
             configurable: true
         });
         /**
-         * @method egret.ByteArray#ensureWriteableSpace
          * @param n {number}
          */
         ByteArray.prototype.ensureWriteableSpace = function (n) {
             this.ensureSpace(n + this.position);
         };
         /**
-         * @method egret.ByteArray#setArrayBuffer
          * @param aBuffer {egret.ArrayBuffer}
          */
         ByteArray.prototype.setArrayBuffer = function (aBuffer) {
@@ -211,7 +209,8 @@ var egret;
         /**
          * 从字节流中读取无符号的字节。
          * 返回值的范围是从 0 到 255。
-         * @method egret.ByteArray#readUnsignedByte 介于 0 到 255 之间的无符号字节。
+         * @method egret.ByteArray#readUnsignedByte
+         * @returns {number} 介于 0 到 255 之间的无符号字节。
          */
         ByteArray.prototype.readUnsignedByte = function () {
             if (this.position >= this.length) {

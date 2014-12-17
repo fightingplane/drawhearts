@@ -564,7 +564,7 @@ var RES;
         Resource.GROUP_CONFIG = "RES__CONFIG";
         return Resource;
     })(egret.EventDispatcher);
-    Resource.prototype.__class__ = "Resource";
+    Resource.prototype.__class__ = "RES.Resource";
     /**
      * Resource单例
      */

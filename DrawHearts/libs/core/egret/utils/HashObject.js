@@ -31,14 +31,12 @@ var egret;
 (function (egret) {
     /**
      * @class egret.HashObject
-     * @classdesc
+     * @classdesc 哈希对象。引擎内所有对象的基类，为对象实例提供唯一的hashCode值,提高对象比较的性能。
      * @implements egret.IHashObject
      */
     var HashObject = (function () {
         /**
          * @method egret.HashObject#constructor
-         * @class egret.HashObject
-         * @classdesc 哈希对象。引擎内所有对象的基类，为对象实例提供唯一的hashCode值,提高对象比较的性能。
          */
         function HashObject() {
             this._hashCode = HashObject.hashCount++;

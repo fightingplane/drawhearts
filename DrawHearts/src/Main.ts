@@ -135,6 +135,10 @@ class Main extends egret.DisplayObjectContainer{
 
         this.textContainer = textContainer;
 
+        //create three clouds
+        this.createOneCloud();
+
+        this.createRandomMoon();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
         RES.getResAsync("description",this.startAnimation,this)
     }
@@ -190,6 +194,57 @@ class Main extends egret.DisplayObjectContainer{
 
             w += colorLabel.width;
         }
+    }
+
+    private createOneCloud(): void
+    {
+        var stageW: number = this.stage.stageWidth;
+        var stageH: number = this.stage.stageHeight;
+
+        var cloud: egret.Bitmap = this.createBitmapByName("cloudImage");
+        cloud.anchorX = cloud.anchorY = 0.5;
+        cloud.x = 0;
+        cloud.y = stageH / 2;
+        this.addChild(cloud);
+
+        var action: CloudAction = new CloudAction(cloud, 1, true);
+        action.addEventListener(CloudMoveFinished.CLOUD_MOVE_DONE, this.onCloudOutOfWindow, this);
+    }
+
+    private onCloudOutOfWindow(event: CloudMoveFinished): void
+    {
+        //an clould is out of window, remove it and create a new one
+        var action = <CloudAction>event.target;
+        if (action)
+            action.removeEventListener(CloudMoveFinished.CLOUD_MOVE_DONE, this.onCloudOutOfWindow, this);
+        if(event.m_target)
+            this.removeChild(event.m_target);
+        this.createOneCloud();
+    }
+
+    private createRandomMoon(): void
+    {
+        var stageW: number = this.stage.stageWidth;
+        var stageH: number = this.stage.stageHeight;
+
+        var moon: egret.Bitmap = this.createBitmapByName("moonImage");
+        moon.anchorX = moon.anchorY = 0.5;
+        moon.x = stageW / 2;
+        moon.y = stageH / 2;
+        this.addChild(moon);
+
+        var moonAction = new MoonFadeAction(moon, 0.01, true);
+        moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
+    }
+
+    private onMoonFaded(event: MoonFadeFinishEvent): void
+    {
+        var action = <MoonFadeAction>event.target;
+        if (action)
+            action.removeEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
+        if (event.m_target != null)
+            this.removeChild(event.m_target);
+        this.createRandomMoon();
     }
 }
 

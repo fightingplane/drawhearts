@@ -33,9 +33,9 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.RenderFilter
      * @classdesc
      * @extends egret.HashObject
+     * @private
      */
     var RenderFilter = (function (_super) {
         __extends(RenderFilter, _super);
@@ -156,6 +156,7 @@ var egret;
                 //                    }
                 //                }
                 renderContext.drawImage(locTexture, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, repeat);
+                break;
             }
         };
         RenderFilter.prototype.ignoreRender = function (data, rect, destX, destY) {
@@ -177,6 +178,7 @@ var egret;
             if (this._drawAreaList.length == 0) {
                 if (!this._defaultDrawAreaList) {
                     this._defaultDrawAreaList = [new egret.Rectangle(0, 0, egret.MainContext.instance.stage.stageWidth, egret.MainContext.instance.stage.stageHeight)];
+                    egret.MainContext.instance.stage.addEventListener(egret.Event.RESIZE, this.onResize, this);
                 }
                 locDrawAreaList = this._defaultDrawAreaList;
             }
@@ -184,6 +186,13 @@ var egret;
                 locDrawAreaList = this._drawAreaList;
             }
             return locDrawAreaList;
+        };
+        /**
+         * 改变尺寸时使用
+         */
+        RenderFilter.prototype.onResize = function () {
+            egret.MainContext.instance.stage.removeEventListener(egret.Event.RESIZE, this.onResize, this);
+            this._defaultDrawAreaList = null;
         };
         return RenderFilter;
     })(egret.HashObject);

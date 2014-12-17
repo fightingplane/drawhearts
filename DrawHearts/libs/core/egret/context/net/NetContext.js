@@ -36,6 +36,7 @@ var egret;
      * @class egret.NetContext
      * @classdesc
      * @extends egret.HashObject
+     * @private
      */
     var NetContext = (function (_super) {
         __extends(NetContext, _super);
@@ -51,6 +52,9 @@ var egret;
                 url = url + "?" + request.data.toString();
             }
             return url;
+        };
+        NetContext.prototype.getChangeList = function () {
+            return [];
         };
         return NetContext;
     })(egret.HashObject);

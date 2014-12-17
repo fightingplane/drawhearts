@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="bin-debug\lib\egret_file_list.js" />
+    <Content Include="bin-debug\src\CloudAction.js" />
     <Content Include="bin-debug\src\game_file_list.js" />
     <Content Include="bin-debug\src\LoadingUI.js" />
     <Content Include="bin-debug\src\Main.js" />
@@ -126,7 +127,9 @@
     <Content Include="libs\core\extension\resource\Resource.js" />
     <Content Include="libs\core\jslib\NumberUtils.js" />
     <Content Include="resource\assets\background.jpg" />
+    <Content Include="resource\assets\cloud.png" />
     <Content Include="resource\assets\egret_icon.png" />
+    <Content Include="resource\assets\moon.png" />
     <Content Include="resource\sounds\bg_music.mp3" />
     <Content Include="web.config" />
   </ItemGroup>
@@ -149,9 +152,12 @@
     <TypeScriptCompile Include="libs\core\core.d.ts" />
     <TypeScriptCompile Include="libs\core\egret\context\html5.d.ts" />
     <TypeScriptCompile Include="libs\_references.ts" />
-    <TypeScriptCompile Include="src\Cloud.ts" />
+    <TypeScriptCompile Include="src\CloudAction.ts" />
+    <TypeScriptCompile Include="src\CloudEvents.ts" />
     <TypeScriptCompile Include="src\LoadingUI.ts" />
     <TypeScriptCompile Include="src\Main.ts" />
+    <TypeScriptCompile Include="src\MoonFadeAction.ts" />
+    <TypeScriptCompile Include="src\MoonEvents.ts" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

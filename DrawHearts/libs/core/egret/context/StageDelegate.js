@@ -37,6 +37,7 @@ var egret;
      * @classdesc
      * StageDelegate负责处理屏幕适配策略
      * @extends egret.HashObject
+     * @private
      */
     var StageDelegate = (function (_super) {
         __extends(StageDelegate, _super);
@@ -65,9 +66,10 @@ var egret;
             return StageDelegate.instance;
         };
         /**
+         * 设置舞台的宽高
          * @method egret.StageDelegate#setDesignSize
          * @param width {number}
-         * @param height {{number}}
+         * @param height {number}
          */
         StageDelegate.prototype.setDesignSize = function (width, height) {
             this._designWidth = width;
@@ -79,7 +81,6 @@ var egret;
             }
         };
         /**
-         * @method egret.StageDelegate#_setResolutionPolicy
          * @param resolutionPolic {any}
          */
         StageDelegate.prototype._setResolutionPolicy = function (resolutionPolicy) {
@@ -106,12 +107,10 @@ var egret;
             return this._offSetY;
         };
         /**
-         * @member egret.StageDelegate.canvas_name
          * @deprecated
          */
         StageDelegate.canvas_name = "egretCanvas";
         /**
-         * @member egret.StageDelegate.canvas_div_name
          */
         StageDelegate.canvas_div_name = "gameDiv";
         return StageDelegate;
@@ -119,7 +118,6 @@ var egret;
     egret.StageDelegate = StageDelegate;
     StageDelegate.prototype.__class__ = "egret.StageDelegate";
     /**
-     * @class egret.ResolutionPolicy
      * @classdesc
      */
     var ResolutionPolicy = (function () {
@@ -150,8 +148,6 @@ var egret;
     egret.ResolutionPolicy = ResolutionPolicy;
     ResolutionPolicy.prototype.__class__ = "egret.ResolutionPolicy";
     /**
-     * @class egret.ContainerStrategy
-     * @classdesc
      */
     var ContainerStrategy = (function () {
         function ContainerStrategy() {
@@ -198,7 +194,6 @@ var egret;
     egret.ContainerStrategy = ContainerStrategy;
     ContainerStrategy.prototype.__class__ = "egret.ContainerStrategy";
     /**
-     * @class egret.EqualToFrame
      * @classdesc
      * @extends egret.ContainerStrategy
      */
@@ -215,8 +210,6 @@ var egret;
     egret.EqualToFrame = EqualToFrame;
     EqualToFrame.prototype.__class__ = "egret.EqualToFrame";
     /**
-     * @class egret.ContentStrategy
-     * @classdesc
      */
     var ContentStrategy = (function () {
         function ContentStrategy() {
@@ -238,8 +231,8 @@ var egret;
         ContentStrategy.prototype.setEgretSize = function (w, h, styleW, styleH, left, top) {
             if (left === void 0) { left = 0; }
             if (top === void 0) { top = 0; }
-            egret.StageDelegate.getInstance()._stageWidth = w;
-            egret.StageDelegate.getInstance()._stageHeight = h;
+            egret.StageDelegate.getInstance()._stageWidth = Math.round(w);
+            egret.StageDelegate.getInstance()._stageHeight = Math.round(h);
             var container = document.getElementById(StageDelegate.canvas_div_name);
             container.style.width = styleW + "px";
             container.style.height = styleH + "px";

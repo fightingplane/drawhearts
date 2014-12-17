@@ -33,9 +33,9 @@ var __extends = this.__extends || function (d, b) {
 var egret;
 (function (egret) {
     /**
-     * @class egret.StageText
      * @classdesc
-     * @extends egret.HashObject
+     * @extends egret.EventDispatcher
+     * @private
      */
     var StageText = (function (_super) {
         __extends(StageText, _super);
@@ -54,33 +54,28 @@ var egret;
             this._maxChars = 0;
         }
         /**
-         * @method egret.StageText#getText
          * @returns {string}
          */
         StageText.prototype._getText = function () {
             return null;
         };
         /**
-         * @method egret.StageText#setText
          * @param value {string}
          */
         StageText.prototype._setText = function (value) {
         };
         /**
-         * @method egret.StageText#setTextType
          * @param type {string}
          */
         StageText.prototype._setTextType = function (type) {
         };
         /**
-         * @method egret.StageText#getTextType
          * @returns {string}
          */
         StageText.prototype._getTextType = function () {
             return null;
         };
         /**
-         * @method egret.StageText#open
          * @param x {number}
          * @param y {number}
          * @param width {number}
@@ -90,23 +85,14 @@ var egret;
             if (width === void 0) { width = 160; }
             if (height === void 0) { height = 21; }
         };
-        /**
-         * @method egret.StageText#add
-         */
         StageText.prototype._show = function () {
         };
         StageText.prototype._add = function () {
         };
-        /**
-         * @method egret.StageText#remove
-         */
         StageText.prototype._remove = function () {
         };
         StageText.prototype._hide = function () {
         };
-        //        public _draw():void {
-        //
-        //        }
         StageText.prototype._addListeners = function () {
         };
         StageText.prototype._removeListeners = function () {
