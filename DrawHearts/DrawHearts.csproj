@@ -126,7 +126,7 @@
     <Content Include="libs\core\extension\resource\events\ResourceEvent.js" />
     <Content Include="libs\core\extension\resource\Resource.js" />
     <Content Include="libs\core\jslib\NumberUtils.js" />
-    <Content Include="resource\assets\background.jpg" />
+    <Content Include="resource\assets\background.png" />
     <Content Include="resource\assets\cloud.png" />
     <Content Include="resource\assets\egret_icon.png" />
     <Content Include="resource\assets\moon.png" />

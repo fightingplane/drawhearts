@@ -1,6 +1,6 @@
 {
     "resources": [
-        { "name": "bgImage", "type": "image", "url": "assets/background.jpg" },
+        { "name": "bgImage", "type": "image", "url": "assets/background.png" },
         { "name": "cloudImage", "type": "image", "url": "assets/cloud.png" },
         { "name": "moonImage", "type": "image", "url": "assets/moon.png" },
         { "name": "egretIcon", "type": "image", "url": "assets/egret_icon.png" },
