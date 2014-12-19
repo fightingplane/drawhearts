@@ -3,12 +3,12 @@
         { "name": "bgImage", "type": "image", "url": "assets/background.png" },
         { "name": "cloudImage", "type": "image", "url": "assets/cloud.png" },
         { "name": "moonImage", "type": "image", "url": "assets/moon.png" },
-        { "name": "egretIcon", "type": "image", "url": "assets/egret_icon.png" },
+        { "name": "heartImage", "type": "image", "url": "assets/heart.png" },
         { "name": "description", "type": "json", "url": "config/description.json" },
         { "name": "bgSound", "type": "sound", "soundType": "music", "url": "sounds/bg_music.mp3" }
     ],
     "groups": [
-        { "name": "preload", "keys": "bgImage, egretIcon, cloudImage, moonImage"},
+        { "name": "preload", "keys": "bgImage, egretIcon, cloudImage, moonImage, heartImage"},
         { "name": "soundload", "keys": "bgSound" }
     ]
 }

@@ -13,19 +13,35 @@
     }
 
     private startFade(): void {
-        this._texture.addEventListener(egret.Event.ENTER_FRAME, this.fade, this);
+        this._texture.alpha = 0;
+        this._texture.addEventListener(egret.Event.ENTER_FRAME, this.show, this);
+        
     }
 
-    private fade(): void {
-        this._texture.alpha -= this._walkStep;
-        
-        if (this._texture.alpha <= 0) {
-            this._texture.removeEventListener(egret.Event.ENTER_FRAME, this.fade, this);
-            this.onFaded();
+    private show(): void
+    {
+        this._texture.alpha += this._walkStep;
+
+        if (this._texture.alpha >= 1)
+        {
+            this._texture.removeEventListener(egret.Event.ENTER_FRAME, this.show, this);
+            this._texture.addEventListener(egret.Event.ENTER_FRAME, this.fade, this);
         }
     }
 
-    private onFaded(): void {
+    private fade(): void {
+
+        this._texture.alpha -= this._walkStep;
+        
+        if (this._texture.alpha <= 0)
+        {
+            this._texture.removeEventListener(egret.Event.ENTER_FRAME, this.fade, this);
+            this.onActionDone();
+        }
+    }
+
+    private onActionDone(): void
+    {
         var fadeFinishedEvent: MoonFadeFinishEvent = new MoonFadeFinishEvent(MoonFadeFinishEvent.MOON_FADE_FINISH);
         fadeFinishedEvent.m_target = this._texture;
         this.dispatchEvent(fadeFinishedEvent);

@@ -87,7 +87,8 @@ class Main extends egret.DisplayObjectContainer{
         }
     }
 
-    private textContainer:egret.Sprite;
+    private m_tipTextContainer: egret.Sprite;
+    private m_titleTextContainer: egret.Sprite;
     /**
      * 创建游戏场景
      */
@@ -108,34 +109,26 @@ class Main extends egret.DisplayObjectContainer{
         topMask.height = stageH;
         this.addChild(topMask);
 
-        var icon:egret.Bitmap = this.createBitmapByName("egretIcon");
-        icon.anchorX = icon.anchorY = 0.5;
-        this.addChild(icon);
-        icon.x = stageW / 2;
-        icon.y = stageH / 2 - 60;
-        icon.scaleX = 0.55;
-        icon.scaleY = 0.55;
-
-        var colorLabel:egret.TextField = new egret.TextField();
-        colorLabel.x = stageW / 2;
-        colorLabel.y = stageH / 2 + 50;
-        colorLabel.anchorX = colorLabel.anchorY = 0.5;
-        colorLabel.textColor = 0xffffff;
-        colorLabel.textAlign = "center";
-        colorLabel.text = "Hello Egret";
-        colorLabel.size = 20;
-        this.addChild(colorLabel);
+        var titleTextContainer: egret.Sprite = new egret.Sprite();
+        titleTextContainer.anchorX = titleTextContainer.anchorY = 0.5;
+        this.addChild(titleTextContainer);
+        titleTextContainer.x = stageW / 2;
+        titleTextContainer.y = stageH * 0.05;
+        titleTextContainer.alpha = 0;
+        this.m_titleTextContainer = titleTextContainer;
 
         var textContainer:egret.Sprite = new egret.Sprite();
         textContainer.anchorX = textContainer.anchorY = 0.5;
         this.addChild(textContainer);
         textContainer.x = stageW / 2;
-        textContainer.y = stageH / 2 + 100;
+        textContainer.y = stageH * 0.9;
         textContainer.alpha = 0;
 
-        this.textContainer = textContainer;
+        this.m_tipTextContainer = textContainer;
 
         //create three clouds
+        this.createOneCloud();
+        this.createOneCloud();
         this.createOneCloud();
 
         this.createRandomMoon();
@@ -154,27 +147,19 @@ class Main extends egret.DisplayObjectContainer{
     /**
      * 描述文件加载成功，开始播放动画
      */
-    private startAnimation(result:Array<any>):void{
-        var textContainer:egret.Sprite = this.textContainer;
-        var count:number = -1;
-        var self:any = this;
-        var change:Function = function() {
-            count++;
-            if (count >= result.length) {
-                count = 0;
-            }
-            var lineArr = result[count];
+    private startAnimation(result: Array<any>): void
+    {
+        var titleTextContainer: egret.Sprite = this.m_titleTextContainer;
+        var tipTextContainer: egret.Sprite = this.m_tipTextContainer;
+        var count:number = result.length;
 
-            self.changeDescription(textContainer, lineArr);
+        var titleStr = result[0];
+        this.changeDescription(titleTextContainer, titleStr);        
+        titleTextContainer.alpha = 1;
 
-            var tw = egret.Tween.get(textContainer);
-            tw.to({"alpha":1}, 200);
-            tw.wait(2000);
-            tw.to({"alpha":0}, 200);
-            tw.call(change, this);
-        }
-
-        change();
+        var tipStr = result[1];//Fixed
+        this.changeDescription(tipTextContainer, tipStr);
+        tipTextContainer.alpha = 1;//show the text
     }
     /**
      * 切换描述内容
@@ -189,7 +174,7 @@ class Main extends egret.DisplayObjectContainer{
             colorLabel.anchorX = colorLabel.anchorY = 0;
             colorLabel.textColor = parseInt(info["textColor"]);
             colorLabel.text = info["text"];
-            colorLabel.size = 40;
+            colorLabel.size = 20;
             textContainer.addChild(colorLabel);
 
             w += colorLabel.width;
@@ -203,11 +188,12 @@ class Main extends egret.DisplayObjectContainer{
 
         var cloud: egret.Bitmap = this.createBitmapByName("cloudImage");
         cloud.anchorX = cloud.anchorY = 0.5;
-        cloud.x = 0;
-        cloud.y = stageH / 2;
+        cloud.x = -cloud.width / 2;
+        cloud.y = this.getRandomNum(stageH * 0.1, stageH * 0.7);
         this.addChild(cloud);
 
-        var action: CloudAction = new CloudAction(cloud, 1, true);
+        var moveStep = this.getRandomNum(0.5);
+        var action: CloudAction = new CloudAction(cloud, moveStep, true);
         action.addEventListener(CloudMoveFinished.CLOUD_MOVE_DONE, this.onCloudOutOfWindow, this);
     }
 
@@ -229,8 +215,8 @@ class Main extends egret.DisplayObjectContainer{
 
         var moon: egret.Bitmap = this.createBitmapByName("moonImage");
         moon.anchorX = moon.anchorY = 0.5;
-        moon.x = stageW / 2;
-        moon.y = stageH / 2;
+        moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
+        moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
         this.addChild(moon);
 
         var moonAction = new MoonFadeAction(moon, 0.01, true);
@@ -245,6 +231,12 @@ class Main extends egret.DisplayObjectContainer{
         if (event.m_target != null)
             this.removeChild(event.m_target);
         this.createRandomMoon();
+    }
+
+    private getRandomNum(min: number = 0, max: number = 1): number
+    {
+        var ret: number = Math.random() * (max - min) + min;
+        return ret;
     }
 }
 

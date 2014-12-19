@@ -128,7 +128,7 @@
     <Content Include="libs\core\jslib\NumberUtils.js" />
     <Content Include="resource\assets\background.png" />
     <Content Include="resource\assets\cloud.png" />
-    <Content Include="resource\assets\egret_icon.png" />
+    <Content Include="resource\assets\heart.png" />
     <Content Include="resource\assets\moon.png" />
     <Content Include="resource\sounds\bg_music.mp3" />
     <Content Include="web.config" />
