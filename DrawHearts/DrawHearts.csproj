@@ -29,6 +29,7 @@
     <Content Include="launcher\index.html" />
     <Content Include="launcher\native_loader.js" />
     <Content Include="launcher\release.html" />
+    <Content Include="launcher\WeixinAPI.js" />
     <Content Include="libs\core\egret\context\Browser.js" />
     <Content Include="libs\core\egret\context\devices\DeviceContext.js" />
     <Content Include="libs\core\egret\context\devices\HTML5DeviceContext.js" />
@@ -151,6 +152,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="libs\core\core.d.ts" />
     <TypeScriptCompile Include="libs\core\egret\context\html5.d.ts" />
+    <TypeScriptCompile Include="libs\WeixinAPI.d.ts" />
     <TypeScriptCompile Include="libs\_references.ts" />
     <TypeScriptCompile Include="src\CloudAction.ts" />
     <TypeScriptCompile Include="src\CloudEvents.ts" />

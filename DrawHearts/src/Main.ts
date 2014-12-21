@@ -31,7 +31,9 @@ class Main extends egret.DisplayObjectContainer{
      * 加载进度界面
      */
     private loadingView:LoadingUI;
-    private bgSound:egret.Sound;
+    private bgSound: egret.Sound;
+    private m_score: number;
+    private m_bestScore: number;
 
     public constructor() {
         super();
@@ -132,6 +134,8 @@ class Main extends egret.DisplayObjectContainer{
         this.createOneCloud();
 
         this.createRandomMoon();
+
+        this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
         RES.getResAsync("description",this.startAnimation,this)
     }
@@ -237,6 +241,36 @@ class Main extends egret.DisplayObjectContainer{
     {
         var ret: number = Math.random() * (max - min) + min;
         return ret;
+    }
+
+    private getBestScore(): number
+    {
+        //TODO:
+        return 0;
+    }
+
+    private saveBestScore(score: number): void
+    {
+    } 
+
+    private gameFinished(): void
+    {
+    }
+
+    private shareToWeiXinTimeLine(): void
+    {
+        //TODO:
+        WeixinApi.ready(function (api: WeixinApi)
+        {
+            alert("WeixinAPI Ready!!");
+
+            var info: WeixinShareInfo = new WeixinShareInfo();
+            info.title = "HelloEgret";
+            info.desc = "欢迎使用Egret";
+            info.link = "www.egret-labs.org";
+            //                        info.imgUrl = "";
+            api.shareToTimeline(info);
+        })
     }
 }
 
