@@ -21,6 +21,7 @@
   <ItemGroup>
     <Content Include="bin-debug\lib\egret_file_list.js" />
     <Content Include="bin-debug\src\CloudAction.js" />
+    <Content Include="bin-debug\src\DrawLayer.js" />
     <Content Include="bin-debug\src\game_file_list.js" />
     <Content Include="bin-debug\src\LoadingUI.js" />
     <Content Include="bin-debug\src\Main.js" />
@@ -156,6 +157,7 @@
     <TypeScriptCompile Include="libs\_references.ts" />
     <TypeScriptCompile Include="src\CloudAction.ts" />
     <TypeScriptCompile Include="src\CloudEvents.ts" />
+    <TypeScriptCompile Include="src\DrawLayer.ts" />
     <TypeScriptCompile Include="src\LoadingUI.ts" />
     <TypeScriptCompile Include="src\Main.ts" />
     <TypeScriptCompile Include="src\MoonFadeAction.ts" />

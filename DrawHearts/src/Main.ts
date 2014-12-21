@@ -25,6 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*class FrameFinishedEvent extends egret.Event
+{
+    public static FRAME_FINISHED: string = "FRAME_FINISHED";
+
+    public constructor(type: string, bubbles: boolean= false, cancelable: boolean= false)
+    {
+        super(type, bubbles, cancelable);
+    }
+}*/
+
 class Main extends egret.DisplayObjectContainer{
 
     /**
@@ -34,20 +44,49 @@ class Main extends egret.DisplayObjectContainer{
     private bgSound: egret.Sound;
     private m_score: number;
     private m_bestScore: number;
+    private b_soundStarted: boolean;
 
-    public constructor() {
+    public constructor()
+    {
         super();
-        this.addEventListener(egret.Event.ADDED_TO_STAGE,this.onAddToStage,this);
+        this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+        //var timer: egret.Timer = new egret.Timer(10, Number.POSITIVE_INFINITY);
+        //this.addEventListener(FrameFinishedEvent.FRAME_FINISHED, this.redraw, this);
+        this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onTouchTap, this);
     }
 
-    private onAddToStage(event:egret.Event){
+    private onAddToStage(event: egret.Event)
+    {
+        //this.m_h5Rendder = <egret.HTML5CanvasRenderer>egret.MainContext.instance.rendererContext;  
+        /*this.m_h5Rendder.onRenderFinish = function (): void
+        {
+            var frameFinished: FrameFinishedEvent = new FrameFinishedEvent(FrameFinishedEvent.FRAME_FINISHED);
+            egret.MainContext.instance.dispatchEvent(frameFinished);
+        }*/ 
+        
         //设置加载进度界面
         this.loadingView  = new LoadingUI();
         this.stage.addChild(this.loadingView);
-
+        this.stage.addEventListener(egret.Event.ACTIVATE, this.onBackFromBackground, this);
+        this.stage.addEventListener(egret.Event.DEACTIVATE, this.onEnterIntoBackground, this);
         //初始化Resource资源加载库
         RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE,this.onConfigComplete,this);
         RES.loadConfig("resource/resource.json","resource/");
+    }
+
+    private onTouchTap(event: egret.TouchEvent): void
+    {
+        console.log("touch tap");
+        if (!this.b_soundStarted)
+        {
+            this.bgSound = RES.getRes("bgSound");
+            if (this.bgSound)
+            {
+                this.bgSound.play();
+                this.bgSound.addEventListener("ended", this.rePlay.bind(this));
+                this.b_soundStarted = true;
+            }
+        }
     }
     /**
      * 配置文件加载完成,开始预加载preload资源组。
@@ -69,9 +108,6 @@ class Main extends egret.DisplayObjectContainer{
             RES.removeEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onResourceLoadComplete, this);
             RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onResourceProgress, this);
             this.createGameScene();
-            this.bgSound = RES.getRes("bgSound");
-            this.bgSound.play();
-            this.bgSound.addEventListener("ended", this.rePlay.bind(this));
         }
     }
 
@@ -96,12 +132,12 @@ class Main extends egret.DisplayObjectContainer{
      */
     private createGameScene():void{
 
-        var sky:egret.Bitmap = this.createBitmapByName("bgImage");
-        this.addChild(sky);
+        //var sky:egret.Bitmap = this.createBitmapByName("bgImage");
+        //this.addChild(sky);
         var stageW:number = this.stage.stageWidth;
         var stageH:number = this.stage.stageHeight;
-        sky.width = stageW;
-        sky.height = stageH;
+        //sky.width = stageW;
+        //sky.height = stageH;
 
         var topMask:egret.Shape = new egret.Shape();
         topMask.graphics.beginFill(0x000000, 0.5);
@@ -135,9 +171,18 @@ class Main extends egret.DisplayObjectContainer{
 
         this.createRandomMoon();
 
+        var draw: DrawLayer = new DrawLayer();
+        draw.width = stageW;
+        draw.height = stageH;
+        draw.anchorX = draw.anchorY = 0.5;
+        draw.x = stageW / 2;
+        draw.y = stageH / 2;
+        this.addChildAt(draw, 5);
+
         this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
-        RES.getResAsync("description",this.startAnimation,this)
+        RES.getResAsync("description", this.startAnimation, this)
+        this.touchEnabled = true;
     }
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
@@ -234,6 +279,10 @@ class Main extends egret.DisplayObjectContainer{
             action.removeEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
         if (event.m_target != null)
             this.removeChild(event.m_target);
+
+        //check if scored and re-create moon
+
+        //this.clearTouchPoints(); 
         this.createRandomMoon();
     }
 
@@ -268,10 +317,22 @@ class Main extends egret.DisplayObjectContainer{
             info.title = "HelloEgret";
             info.desc = "欢迎使用Egret";
             info.link = "www.egret-labs.org";
-            //                        info.imgUrl = "";
+            //info.imgUrl = "";
             api.shareToTimeline(info);
         })
     }
+
+    private onEnterIntoBackground(event: egret.Event): void
+    {
+        if (this.bgSound)
+        {
+            this.bgSound.pause();
+        }
+    }
+
+    private onBackFromBackground(event: egret.Event): void
+    {
+        if (this.bgSound)
+            this.bgSound.play();
+    }
 }
-
-
