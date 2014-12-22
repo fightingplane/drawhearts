@@ -45,6 +45,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_score: number;
     private m_bestScore: number;
     private b_soundStarted: boolean;
+    private m_drawLayer: DrawLayer = null;
 
     public constructor()
     {
@@ -132,12 +133,12 @@ class Main extends egret.DisplayObjectContainer{
      */
     private createGameScene():void{
 
-        //var sky:egret.Bitmap = this.createBitmapByName("bgImage");
-        //this.addChild(sky);
+        var sky:egret.Bitmap = this.createBitmapByName("bgImage");
+        this.addChild(sky);
         var stageW:number = this.stage.stageWidth;
         var stageH:number = this.stage.stageHeight;
-        //sky.width = stageW;
-        //sky.height = stageH;
+        sky.width = stageW;
+        sky.height = stageH;
 
         var topMask:egret.Shape = new egret.Shape();
         topMask.graphics.beginFill(0x000000, 0.5);
@@ -171,13 +172,13 @@ class Main extends egret.DisplayObjectContainer{
 
         this.createRandomMoon();
 
-        var draw: DrawLayer = new DrawLayer();
-        draw.width = stageW;
-        draw.height = stageH;
-        draw.anchorX = draw.anchorY = 0.5;
-        draw.x = stageW / 2;
-        draw.y = stageH / 2;
-        this.addChildAt(draw, 5);
+        this.m_drawLayer = new DrawLayer();
+        this.m_drawLayer.width = stageW;
+        this.m_drawLayer.height = stageH;
+        this.m_drawLayer.anchorX = this.m_drawLayer.anchorY = 0.5;
+        this.m_drawLayer.x = stageW / 2;
+        this.m_drawLayer.y = stageH / 2;
+        this.addChildAt(this.m_drawLayer, 7);
 
         this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
@@ -239,7 +240,7 @@ class Main extends egret.DisplayObjectContainer{
         cloud.anchorX = cloud.anchorY = 0.5;
         cloud.x = -cloud.width / 2;
         cloud.y = this.getRandomNum(stageH * 0.1, stageH * 0.7);
-        this.addChild(cloud);
+        this.addChildAt(cloud, 2);
 
         var moveStep = this.getRandomNum(0.5);
         var action: CloudAction = new CloudAction(cloud, moveStep, true);
@@ -266,7 +267,7 @@ class Main extends egret.DisplayObjectContainer{
         moon.anchorX = moon.anchorY = 0.5;
         moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
         moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
-        this.addChild(moon);
+        this.addChildAt(moon, 6);
 
         var moonAction = new MoonFadeAction(moon, 0.01, true);
         moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
@@ -277,12 +278,16 @@ class Main extends egret.DisplayObjectContainer{
         var action = <MoonFadeAction>event.target;
         if (action)
             action.removeEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
+        
+        //check if scored and re-create moon
+        var positionXList: Array<number> = this.m_drawLayer.positionXList;
+        var positionYList: Array<number> = this.m_drawLayer.positionYList;
+        this.checkScore(event.m_target, positionXList, positionYList);
+
         if (event.m_target != null)
             this.removeChild(event.m_target);
+        this.m_drawLayer.clearTouchPoints(); 
 
-        //check if scored and re-create moon
-
-        //this.clearTouchPoints(); 
         this.createRandomMoon();
     }
 
@@ -292,18 +297,79 @@ class Main extends egret.DisplayObjectContainer{
         return ret;
     }
 
-    private getBestScore(): number
+    private checkScore(target:egret.Bitmap, positionX:Array<number>, positionY:Array<number>): void
     {
-        //TODO:
-        return 0;
+        if (positionX == null || positionY == null)
+            return;
+        if (positionX.length <= 3 || positionY.length <= 3)
+            return;
+
+        var minX: number = 0;
+        var maxX: number = 0;
+        var minY: number = 0;
+        var maxY: number = 0;
+
+        minX = maxX = positionX[0];
+        minY = maxY = positionY[0];
+
+        for (var i = 0; i < positionX.length; i++)
+        {
+            minX = Math.min(minX, positionX[i]);
+            maxX = Math.max(maxX, positionX[i]); 
+        }
+
+        for (var i = 0; i < positionY.length; i++){
+            minY = Math.min(minX, positionX[i]);
+            maxY = Math.max(maxX, positionX[i]);
+        }
+
+        var area: number = (maxX - minX) * (maxY - minY);
+        var targetArea: number = target.width * target.height;
+        
+        //center
+        var targetPosX:number = target.x;
+        var targetPosY: number = target.y;
+        var centerX = (maxX + minX) / 2;
+        var centerY = (minY + maxY) / 2;
+
+        if (Math.abs(targetArea - area) < targetArea * 0.2 &&
+            Math.abs(targetPosX - centerX) < 20 &&
+            Math.abs(targetPosY - centerY) < 20)
+        {
+            egret.Logger.info("Got one score");
+            //show an heart 
+            this.addOneScore();
+        }
     }
 
-    private saveBestScore(score: number): void
+    private addOneScore(): void
     {
+        this.m_score = this.m_score + 1;
+        if (this.m_score > this.m_bestScore)
+        {
+            egret.Logger.info("new record generates");
+            this.m_bestScore = this.m_score;
+            this.saveBestScore();
+        }
+    }
+
+    private get bestScore(): number
+    {
+        //ready the score from the storage
+        var bestScore: string = egret.localStorage.getItem("best_score");
+        this.m_bestScore = parseInt(bestScore);
+        return this.m_bestScore;
+    }
+
+    private saveBestScore(): void
+    {
+        //push the score to the storage
+        egret.localStorage.setItem("best_score", String(this.m_bestScore).toString());
     } 
 
     private gameFinished(): void
     {
+        //show score and share btn
     }
 
     private shareToWeiXinTimeLine(): void

@@ -17,6 +17,8 @@ var DrawLayer = (function (_super) {
         this.addEventListener(egret.TouchEvent.TOUCH_END, this.onTouchEnded, this);
     }
     DrawLayer.prototype.onAddToStage = function (event) {
+        this.m_shap = new egret.Shape;
+        this.addChild(this.m_shap);
         this.touchEnabled = true;
     };
     DrawLayer.prototype.addTouchPoint = function (locationX, locationY, isDragging) {
@@ -35,25 +37,20 @@ var DrawLayer = (function (_super) {
             return;
         var stageW = this.stage.stageWidth;
         var stageH = this.stage.stageHeight;
-        //context2d.clearRect(0, 0, stageW, stageH); // Clears the canvas
-        context2d.strokeStyle = "#df4b26";
-        context2d.lineJoin = "round";
-        context2d.lineWidth = 5;
+        this.m_shap.graphics.clear();
+        this.m_shap.graphics.lineStyle(3, 0xff0000, 1, true, "", "", "round");
         for (var i = 0; i < this.m_clickX.length; i++) {
-            context2d.beginPath();
             if (this.m_clickDrag[i] && i) {
-                context2d.moveTo(this.m_clickX[i - 1], this.m_clickY[i - 1]);
+                this.m_shap.graphics.moveTo(this.m_clickX[i - 1], this.m_clickY[i - 1]);
             }
             else {
-                context2d.moveTo(this.m_clickX[i] - 1, this.m_clickY[i]);
+                this.m_shap.graphics.moveTo(this.m_clickX[i] - 1, this.m_clickY[i]);
             }
-            context2d.lineTo(this.m_clickX[i], this.m_clickY[i]);
-            context2d.closePath();
-            context2d.stroke();
+            this.m_shap.graphics.lineTo(this.m_clickX[i], this.m_clickY[i]);
         }
+        this.m_shap.graphics.endFill();
     };
     DrawLayer.prototype.clearTouchPoints = function () {
-        //TODO:
         if (this.m_clickX)
             delete this.m_clickX;
         if (this.m_clickY)
@@ -85,6 +82,20 @@ var DrawLayer = (function (_super) {
         _super.prototype._draw.call(this, renderContext);
         this.redraw(renderContext);
     };
+    Object.defineProperty(DrawLayer.prototype, "positionXList", {
+        get: function () {
+            return this.m_clickX;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DrawLayer.prototype, "positionYList", {
+        get: function () {
+            return this.m_clickY;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return DrawLayer;
 })(egret.Sprite);
 //# sourceMappingURL=DrawLayer.js.map

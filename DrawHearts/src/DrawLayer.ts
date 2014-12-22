@@ -5,7 +5,7 @@
     private m_clickY: Array<number>;
     private m_clickDrag: Array<boolean>;
     private m_h5Rendder: egret.HTML5CanvasRenderer;
-
+    private m_shap: egret.Shape;
     public constructor()
     {
         super();
@@ -21,6 +21,9 @@
 
     private onAddToStage(event: egret.Event)
     {
+        this.m_shap = new egret.Shape;
+        this.addChild(this.m_shap);
+
         this.touchEnabled = true;
     }
 
@@ -43,31 +46,26 @@
 
         var stageW: number = this.stage.stageWidth;
         var stageH: number = this.stage.stageHeight;
-        //context2d.clearRect(0, 0, stageW, stageH); // Clears the canvas
 
-        context2d.strokeStyle = "#df4b26";
-        context2d.lineJoin = "round";
-        context2d.lineWidth = 5;
+        this.m_shap.graphics.clear();
+        this.m_shap.graphics.lineStyle(3, 0xff0000, 1, true, "", "", "round");
 
         for (var i = 0; i < this.m_clickX.length; i++)
         {
-            context2d.beginPath();
             if (this.m_clickDrag[i] && i)
             {
-                context2d.moveTo(this.m_clickX[i - 1], this.m_clickY[i - 1]);
+                this.m_shap.graphics.moveTo(this.m_clickX[i - 1], this.m_clickY[i - 1]);            
             } else
             {
-                context2d.moveTo(this.m_clickX[i] - 1, this.m_clickY[i]);
+                this.m_shap.graphics.moveTo(this.m_clickX[i] - 1, this.m_clickY[i]);
             }
-            context2d.lineTo(this.m_clickX[i], this.m_clickY[i]);
-            context2d.closePath();
-            context2d.stroke();
+            this.m_shap.graphics.lineTo(this.m_clickX[i], this.m_clickY[i]);
         }
+        this.m_shap.graphics.endFill();              
     }
 
-    private clearTouchPoints(): void
+    public clearTouchPoints(): void
     {
-        //TODO:
         if (this.m_clickX)
             delete this.m_clickX;
 
@@ -105,8 +103,17 @@
         this.b_paint = false;
     }
      
-    public _draw(renderContext: egret.RendererContext): void{
+    public _draw(renderContext: egret.RendererContext): void
+    {
         super._draw(renderContext);
         this.redraw(renderContext);
+    }
+
+    public get positionXList(): Array<number>{
+        return this.m_clickX;
+    }
+
+    public get positionYList(): Array<number>{
+        return this.m_clickY;
     }
 } 
