@@ -43,7 +43,9 @@ class Main extends egret.DisplayObjectContainer{
     private loadingView:LoadingUI;
     private bgSound: egret.Sound;
     private m_score: number;
+    private m_scoreLable: egret.TextField = null;
     private m_bestScore: number;
+    private m_bestScoreLable: egret.TextField = null;
     private b_soundStarted: boolean;
     private m_drawLayer: DrawLayer = null;
 
@@ -140,14 +142,6 @@ class Main extends egret.DisplayObjectContainer{
         sky.width = stageW;
         sky.height = stageH;
 
-        var topMask:egret.Shape = new egret.Shape();
-        topMask.graphics.beginFill(0x000000, 0.5);
-        topMask.graphics.drawRect(0, 0, stageW, stageH);
-        topMask.graphics.endFill();
-        topMask.width = stageW;
-        topMask.height = stageH;
-        this.addChild(topMask);
-
         var titleTextContainer: egret.Sprite = new egret.Sprite();
         titleTextContainer.anchorX = titleTextContainer.anchorY = 0.5;
         this.addChild(titleTextContainer);
@@ -171,6 +165,78 @@ class Main extends egret.DisplayObjectContainer{
         this.createOneCloud();
 
         this.createRandomMoon();
+
+        //high score 
+        var highScoreHeart: egret.Bitmap = this.createBitmapByName("heartImage");
+        this.addChildAt(highScoreHeart, 6);
+        highScoreHeart.scaleX = highScoreHeart.scaleY = 0.5;
+        highScoreHeart.anchorX = highScoreHeart.anchorY = 0.5;
+        highScoreHeart.x = stageW * 0.85;
+        highScoreHeart.y = stageH * 0.1;
+
+        var highScoreLabel: egret.TextField = new egret.TextField();
+        this.addChildAt(highScoreLabel, 6);
+        highScoreLabel.anchorX = 1;
+        highScoreLabel.anchorY = 0.5;
+        highScoreLabel.x = highScoreHeart.x - highScoreHeart.width * 0.25;
+        highScoreLabel.y = highScoreHeart.y;
+        highScoreLabel.text = "最高分";
+        highScoreLabel.size = 20;
+
+        var xLabel1: egret.TextField = new egret.TextField();
+        this.addChildAt(xLabel1, 6);
+        xLabel1.anchorX = 0;
+        xLabel1.anchorY = 0.5;
+        xLabel1.x = highScoreHeart.x + highScoreHeart.width * 0.25;
+        xLabel1.y = highScoreHeart.y;
+        xLabel1.text = "X";
+        xLabel1.size = 10;
+
+        var highScore: egret.TextField = new egret.TextField();
+        this.addChildAt(highScore, 6);
+        highScore.anchorX = 0;
+        highScore.anchorY = 0.5;
+        highScore.x = xLabel1.x + xLabel1.width * 1.2;
+        highScore.y = xLabel1.y;
+        this.m_bestScoreLable = highScore;
+        highScore.text = "0";
+        highScore.size = 20;
+
+        //current score
+        var scoreHeart: egret.Bitmap = this.createBitmapByName("heartImage");
+        this.addChildAt(scoreHeart, 6);
+        scoreHeart.scaleX = scoreHeart.scaleY = 0.5;
+        scoreHeart.anchorX = scoreHeart.anchorY = 0.5;
+        scoreHeart.x = stageW * 0.85;
+        scoreHeart.y = stageH * 0.15;
+
+        var scoreLabel: egret.TextField = new egret.TextField();
+        this.addChildAt(scoreLabel, 6);
+        scoreLabel.anchorX = 1;
+        scoreLabel.anchorY = 0.5;
+        scoreLabel.x = scoreHeart.x - scoreHeart.width * 0.25;
+        scoreLabel.y = scoreHeart.y;
+        scoreLabel.text = "得分";
+        scoreLabel.size = 20;
+
+        var xLabel2: egret.TextField = new egret.TextField();
+        this.addChildAt(xLabel2, 6);
+        xLabel2.anchorX = 0;
+        xLabel2.anchorY = 0.5;
+        xLabel2.x = scoreHeart.x + scoreHeart.width * 0.25;
+        xLabel2.y = scoreHeart.y;
+        xLabel2.text = "X";
+        xLabel2.size = 10;
+
+        var score: egret.TextField = new egret.TextField();
+        this.addChildAt(score, 6);
+        score.anchorX = 0;
+        score.anchorY = 0.5;
+        score.x = xLabel2.x + xLabel2.width * 1.2;
+        score.y = xLabel2.y;
+        this.m_scoreLable = score;
+        score.text = "0";
+        score.size = 20;
 
         this.m_drawLayer = new DrawLayer();
         this.m_drawLayer.width = stageW;
@@ -204,7 +270,7 @@ class Main extends egret.DisplayObjectContainer{
         var count:number = result.length;
 
         var titleStr = result[0];
-        this.changeDescription(titleTextContainer, titleStr);        
+        this.changeDescription(titleTextContainer, titleStr, 30, true);        
         titleTextContainer.alpha = 1;
 
         var tipStr = result[1];//Fixed
@@ -214,7 +280,7 @@ class Main extends egret.DisplayObjectContainer{
     /**
      * 切换描述内容
      */
-    private changeDescription(textContainer:egret.Sprite, lineArr:Array<any>):void {
+    private changeDescription(textContainer:egret.Sprite, lineArr:Array<any>, fontSize :number = 20, bBold:boolean = false):void {
         textContainer.removeChildren();
         var w:number = 0;
         for (var i:number = 0; i < lineArr.length; i++) {
@@ -224,7 +290,8 @@ class Main extends egret.DisplayObjectContainer{
             colorLabel.anchorX = colorLabel.anchorY = 0;
             colorLabel.textColor = parseInt(info["textColor"]);
             colorLabel.text = info["text"];
-            colorLabel.size = 20;
+            colorLabel.bold = bBold;
+            colorLabel.size = fontSize;
             textContainer.addChild(colorLabel);
 
             w += colorLabel.width;
@@ -267,7 +334,7 @@ class Main extends egret.DisplayObjectContainer{
         moon.anchorX = moon.anchorY = 0.5;
         moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
         moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
-        this.addChildAt(moon, 6);
+        this.addChildAt(moon, 5);
 
         var moonAction = new MoonFadeAction(moon, 0.01, true);
         moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
