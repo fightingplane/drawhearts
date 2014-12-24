@@ -39,7 +39,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_timeLeft :number = 0;
     private m_timeLeftLabel :egret.TextField = null;
     private m_startBtn: egret.gui.Button = null;
-
+    private m_currentMoon: egret.Bitmap = null;
     public constructor()
     {
         super();
@@ -87,7 +87,6 @@ class Main extends egret.DisplayObjectContainer{
         RES.loadGroup("preload", 1);
         RES.loadGroup("theme_preload", 1);
         RES.loadGroup("soundload", 0);
-
     }
     /**
      * preload资源组加载完成
@@ -353,7 +352,7 @@ class Main extends egret.DisplayObjectContainer{
         moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
         moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
         this.addChildAt(moon, 5);
-
+        this.m_currentMoon = moon;
         var moonAction = new MoonFadeAction(moon, 0.01, true);
         moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
     }
@@ -382,7 +381,7 @@ class Main extends egret.DisplayObjectContainer{
         return ret;
     }
 
-    private checkScore(target:egret.Bitmap, positionX:Array<number>, positionY:Array<number>): void
+    private checkScore(target: egret.Bitmap, positionX: Array<number>, positionY: Array<number>): void
     {
         if (positionX == null || positionY == null)
             return;
@@ -499,15 +498,18 @@ class Main extends egret.DisplayObjectContainer{
 
     private gameFinished(): void
     {
+//        this.m_drawLayer.touchEnabled = false;
+/*        var result: ResultPanel = new ResultPanel;
+        this.addChild(result);
+        */
         //popup score and share btn
-
+        this.shareToWeiXinTimeLine();
     }
 
     private shareToWeiXinTimeLine(): void
     {
         //TODO:
-        WeixinApi.ready(function (api: WeixinApi)
-        {
+        WeixinApi.ready(function (api: WeixinApi){
             alert("WeixinAPI Ready!!");
 
             var info: WeixinShareInfo = new WeixinShareInfo();
@@ -516,7 +518,7 @@ class Main extends egret.DisplayObjectContainer{
             info.link = "www.egret-labs.org";
             //info.imgUrl = "";
             api.shareToTimeline(info);
-        })
+        });
     }
 
     private onEnterIntoBackground(event: egret.Event): void

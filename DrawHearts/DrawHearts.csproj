@@ -389,6 +389,7 @@
     <TypeScriptCompile Include="src\Main.ts" />
     <TypeScriptCompile Include="src\MoonFadeAction.ts" />
     <TypeScriptCompile Include="src\MoonEvents.ts" />
+    <TypeScriptCompile Include="src\ResultPanel.ts" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
