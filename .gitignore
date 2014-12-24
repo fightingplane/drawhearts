@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/DrawHearts/resource/checkbox-select_disabled.png
+/DrawHearts/resource/checkbox-select_normal.png
+/DrawHearts/resource/checkbox-select_over.png
+/DrawHearts/resource/checkbox-unselect_disabled.png
+/DrawHearts/resource/checkbox-unselect_normal.png
+/DrawHearts/resource/checkbox-unselect_over.png

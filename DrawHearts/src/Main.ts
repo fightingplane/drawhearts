@@ -25,21 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*class FrameFinishedEvent extends egret.Event
-{
-    public static FRAME_FINISHED: string = "FRAME_FINISHED";
-
-    public constructor(type: string, bubbles: boolean= false, cancelable: boolean= false)
-    {
-        super(type, bubbles, cancelable);
-    }
-}*/
-
 class Main extends egret.DisplayObjectContainer{
 
-    /**
-     * 加载进度界面
-     */
     private loadingView:LoadingUI;
     private bgSound: egret.Sound;
     private m_score: number = 0;
@@ -266,6 +253,7 @@ class Main extends egret.DisplayObjectContainer{
         this.m_drawLayer.x = stageW / 2;
         this.m_drawLayer.y = stageH / 2;
         this.addChildAt(this.m_drawLayer, 7);
+        this.m_drawLayer.touchEnabled = false;
 
         //this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
@@ -416,8 +404,8 @@ class Main extends egret.DisplayObjectContainer{
         }
 
         for (var i = 0; i < positionY.length; i++){
-            minY = Math.min(minX, positionX[i]);
-            maxY = Math.max(maxX, positionX[i]);
+            minY = Math.min(minY, positionY[i]);
+            maxY = Math.max(maxY, positionY[i]);
         }
 
         var area: number = (maxX - minX) * (maxY - minY);
@@ -435,16 +423,37 @@ class Main extends egret.DisplayObjectContainer{
         {
             egret.Logger.info("Got one score");
             //show an heart 
-            this.addOneScore();
+            this.addOneScore(targetPosX, targetPosY);
         }
     }
 
-    private addOneScore(): void
+    private addOneScore(posX:number, posY:number): void
+    {        
+        //create a heaer and move to score heart
+        var heart: egret.Bitmap = this.createBitmapByName("heartImage");
+        this.addChildAt(heart, 6);
+        heart.anchorX = heart.anchorY = 0.5;
+        heart.x = posX;
+        heart.y = posY;
+        //run action
+        var stageW: number = this.stage.stageWidth;
+        var stageH: number = this.stage.stageHeight;
+        var heartAction: HeartAction = new HeartAction(heart, stageW * 0.85, stageH * 0.15, 0.5, true);
+        heartAction.addEventListener(HeartActionFinished.HEART_ACTION_DONE, this.onHeartMoveDone, this);
+    }
+
+    private onHeartMoveDone(evt: HeartActionFinished): void
     {
+        var action = evt.target;
+        if (action)
+            action.removeEventListener(HeartActionFinished.HEART_ACTION_DONE, this.onHeartMoveDone, this);
+
+        if (evt.m_target != null)
+            this.removeChild(evt.m_target);
+
         this.m_score = this.m_score + 1;
         this.m_scoreLabel.text = String(this.m_score);
-        if (this.m_score > this.m_bestScore)
-        {
+        if (this.m_score > this.m_bestScore){
             egret.Logger.info("new record generates");
             this.m_bestScore = this.m_score;
             this.m_bestScoreLabel.text = String(this.m_bestScore);
@@ -473,6 +482,7 @@ class Main extends egret.DisplayObjectContainer{
     private startGame() :void
     {
         //start timer
+        this.m_drawLayer.touchEnabled = true;
         this.m_timeLeft = Main.ROUND_TIME;
         this.m_timeLeftLabel.text = String(this.m_timeLeft);
         var timer: egret.Timer = new egret.Timer(1000, Main.ROUND_TIME);

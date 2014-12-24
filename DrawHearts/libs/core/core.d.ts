@@ -366,6 +366,7 @@ declare module egret {
          * @constant {string} egret.Event.ENTER_FRAME
          */
         static ENTER_FRAME: string;
+        static FRAME_FINISHED: string;
         /**
          * 主循环：开始渲染
          * @constant {string} egret.Event.RENDER
