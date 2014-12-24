@@ -3,7 +3,10 @@
 	"modules": [
 		{
 			"name": "core"
-		}
+		},
+	  	{
+			"name": "gui"
+	  	}
 	],
 	"native": {
 		"path_ignore": []
