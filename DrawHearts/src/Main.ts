@@ -42,31 +42,29 @@ class Main extends egret.DisplayObjectContainer{
      */
     private loadingView:LoadingUI;
     private bgSound: egret.Sound;
-    private m_score: number;
-    private m_scoreLable: egret.TextField = null;
-    private m_bestScore: number;
-    private m_bestScoreLable: egret.TextField = null;
+    private m_score: number = 0;
+    private m_scoreLabel: egret.TextField = null;
+    private m_bestScore: number = 0;
+    private m_bestScoreLabel: egret.TextField = null;
     private b_soundStarted: boolean;
     private m_drawLayer: DrawLayer = null;
+    static ROUND_TIME : number = 30;
+    private m_timeLeft :number = 0;
+    private m_timeLeftLabel :egret.TextField = null;
+    private m_startBtn: egret.gui.Button = null;
 
     public constructor()
     {
         super();
         this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
-        //var timer: egret.Timer = new egret.Timer(10, Number.POSITIVE_INFINITY);
-        //this.addEventListener(FrameFinishedEvent.FRAME_FINISHED, this.redraw, this);
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onTouchTap, this);
     }
 
     private onAddToStage(event: egret.Event)
     {
-        //this.m_h5Rendder = <egret.HTML5CanvasRenderer>egret.MainContext.instance.rendererContext;  
-        /*this.m_h5Rendder.onRenderFinish = function (): void
-        {
-            var frameFinished: FrameFinishedEvent = new FrameFinishedEvent(FrameFinishedEvent.FRAME_FINISHED);
-            egret.MainContext.instance.dispatchEvent(frameFinished);
-        }*/ 
-        
+        egret.Injector.mapClass("egret.gui.IAssetAdapter", AssetAdapter);
+        egret.gui.Theme.load("resource/theme.thm");
+
         //设置加载进度界面
         this.loadingView  = new LoadingUI();
         this.stage.addChild(this.loadingView);
@@ -75,6 +73,7 @@ class Main extends egret.DisplayObjectContainer{
         //初始化Resource资源加载库
         RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE,this.onConfigComplete,this);
         RES.loadConfig("resource/resource.json","resource/");
+        RES.loadConfig("resource/theme_resource.json", "resource/");
     }
 
     private onTouchTap(event: egret.TouchEvent): void
@@ -99,7 +98,9 @@ class Main extends egret.DisplayObjectContainer{
         RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onResourceLoadComplete,this);
         RES.addEventListener(RES.ResourceEvent.GROUP_PROGRESS,this.onResourceProgress,this);
         RES.loadGroup("preload", 1);
+        RES.loadGroup("theme_preload", 1);
         RES.loadGroup("soundload", 0);
+
     }
     /**
      * preload资源组加载完成
@@ -166,6 +167,26 @@ class Main extends egret.DisplayObjectContainer{
 
         this.createRandomMoon();
 
+        //Time left label
+        var counterLabel: egret.TextField = new egret.TextField();
+        this.addChildAt(counterLabel, 6);
+        counterLabel.anchorX = 0;
+        counterLabel.anchorY = 0.5;
+        counterLabel.x = stageW * 0.08;
+        counterLabel.y = stageH * 0.1;
+        counterLabel.text = "倒计时: ";
+        counterLabel.size = 20;
+
+        var counterValueLabel: egret.TextField = new egret.TextField();
+        this.addChildAt(counterValueLabel, 6);
+        counterValueLabel.anchorX = 0;
+        counterValueLabel.anchorY = 0.5;
+        counterValueLabel.x = counterLabel.x + counterLabel.width;
+        counterValueLabel.y = counterLabel.y;
+        counterValueLabel.text = "0";
+        counterValueLabel.size = 20;
+        this.m_timeLeftLabel = counterValueLabel;
+
         //high score 
         var highScoreHeart: egret.Bitmap = this.createBitmapByName("heartImage");
         this.addChildAt(highScoreHeart, 6);
@@ -198,8 +219,8 @@ class Main extends egret.DisplayObjectContainer{
         highScore.anchorY = 0.5;
         highScore.x = xLabel1.x + xLabel1.width * 1.2;
         highScore.y = xLabel1.y;
-        this.m_bestScoreLable = highScore;
-        highScore.text = "0";
+        this.m_bestScoreLabel = highScore;
+        highScore.text = String(this.bestScore);
         highScore.size = 20;
 
         //current score
@@ -234,7 +255,7 @@ class Main extends egret.DisplayObjectContainer{
         score.anchorY = 0.5;
         score.x = xLabel2.x + xLabel2.width * 1.2;
         score.y = xLabel2.y;
-        this.m_scoreLable = score;
+        this.m_scoreLabel = score;
         score.text = "0";
         score.size = 20;
 
@@ -246,10 +267,19 @@ class Main extends egret.DisplayObjectContainer{
         this.m_drawLayer.y = stageH / 2;
         this.addChildAt(this.m_drawLayer, 7);
 
-        this.shareToWeiXinTimeLine();
+        //this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
-        RES.getResAsync("description", this.startAnimation, this)
+        RES.getResAsync("description", this.startAnimation, this);
         this.touchEnabled = true;
+        //create start game button
+        var btn:egret.gui.Button = new egret.gui.Button();
+        btn.label = "开始游戏";
+        btn.anchorX = btn.anchorY = 0.5
+        btn.x = stageW * 0.5;
+        btn.y = stageH * 0.75;
+        this.addChild(btn);
+        btn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onStartBtnTouched, this);
+        this.m_startBtn = btn;
     }
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
@@ -316,7 +346,7 @@ class Main extends egret.DisplayObjectContainer{
 
     private onCloudOutOfWindow(event: CloudMoveFinished): void
     {
-        //an clould is out of window, remove it and create a new one
+        //an cloud is out of window, remove it and create a new one
         var action = <CloudAction>event.target;
         if (action)
             action.removeEventListener(CloudMoveFinished.CLOUD_MOVE_DONE, this.onCloudOutOfWindow, this);
@@ -412,20 +442,43 @@ class Main extends egret.DisplayObjectContainer{
     private addOneScore(): void
     {
         this.m_score = this.m_score + 1;
+        this.m_scoreLabel.text = String(this.m_score);
         if (this.m_score > this.m_bestScore)
         {
             egret.Logger.info("new record generates");
             this.m_bestScore = this.m_score;
+            this.m_bestScoreLabel.text = String(this.m_bestScore);
             this.saveBestScore();
         }
     }
 
-    private get bestScore(): number
+    public get bestScore(): number
     {
         //ready the score from the storage
         var bestScore: string = egret.localStorage.getItem("best_score");
         this.m_bestScore = parseInt(bestScore);
+        if(isNaN(this.m_bestScore)) {
+            this.m_bestScore = 0;
+        }
         return this.m_bestScore;
+    }
+
+    private onStartBtnTouched(event:egret.Event):void
+    {
+        this.m_startBtn.enabled = false;
+        this.m_startBtn.visible = false;
+        this.startGame();
+    }
+
+    private startGame() :void
+    {
+        //start timer
+        this.m_timeLeft = Main.ROUND_TIME;
+        this.m_timeLeftLabel.text = String(this.m_timeLeft);
+        var timer: egret.Timer = new egret.Timer(1000, Main.ROUND_TIME);
+        timer.addEventListener(egret.TimerEvent.TIMER,this.onTimerEvent,this);
+        timer.addEventListener(egret.TimerEvent.TIMER_COMPLETE,this.onTimeUp,this);
+        timer.start();
     }
 
     private saveBestScore(): void
@@ -436,7 +489,8 @@ class Main extends egret.DisplayObjectContainer{
 
     private gameFinished(): void
     {
-        //show score and share btn
+        //popup score and share btn
+
     }
 
     private shareToWeiXinTimeLine(): void
@@ -467,5 +521,21 @@ class Main extends egret.DisplayObjectContainer{
     {
         if (this.bgSound)
             this.bgSound.play();
+    }
+
+    private onTimerEvent(event:egret.TimerEvent):void
+    {
+        //update time left label
+        this.m_timeLeft -= 1;
+        if(this.m_timeLeft < 0)
+            this.m_timeLeft = 0;
+
+        this.m_timeLeftLabel.text = String(this.m_timeLeft);
+    }
+
+    private onTimeUp(event:egret.TimerEvent):void
+    {
+        //Game Over
+        this.gameFinished();
     }
 }
