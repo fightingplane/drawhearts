@@ -39,7 +39,7 @@ class ResultPanel extends egret.gui.Group
         winTip.anchorY = 0.5;
         winTip.x = this.panel.width * 0.5;
         winTip.y = this.panel.height * 0.4;
-        winTip.text = "分享游戏, 获得门票的概率越大";
+        winTip.text = "分享游戏, 获得门票的概率翻倍";
         winTip.size = 20;
         winTip.textColor = 0x000000;//black
 
@@ -61,12 +61,14 @@ class ResultPanel extends egret.gui.Group
         this.panel.addElement(tryAgainBtn);
         //this.panel.layout
         egret.gui.PopUpManager.addPopUp(this.panel, true, true);
-}
+    }
 
     private onShareEvent(evt: egret.TouchEvent): void
     {
         egret.Logger.info("On share button touched");
-        this.shareToWeiXinTimeLine();
+        this.shareToWeiXinTimeLine(this.m_score);
+        //also show an tip
+
     }
 
     private onTryAgainEvent(evt: egret.TouchEvent):void
@@ -77,17 +79,20 @@ class ResultPanel extends egret.gui.Group
         this.dispatchEvent(startEvt);
     }
 
-    private shareToWeiXinTimeLine(): void
+    private shareToWeiXinTimeLine(score:number, backFun:Function = null): void
     {
         WeixinApi.ready(function (api: WeixinApi){
-            alert("WeixinAPI Ready!!");
-
             var info: WeixinShareInfo = new WeixinShareInfo();
-            info.title = "HelloEgret";
-            info.desc = "欢迎使用Egret";
-            info.link = "www.egret-labs.org";
+            info.title = "玩游戏,赢齐秦歌友会门票";
+            info.desc = "我刚画了" + String(score) + "个心, 敢来挑战吗?";
+            info.link = "http://fightingplane.github.io/drawhearts";
             //info.imgUrl = "";
-            api.shareToTimeline(info);
+
+            var backInfo:WeixinShareCallbackInfo = new WeixinShareCallbackInfo();
+            if(backFun != null) {
+                backInfo.confirm = backFun;
+            }
+            api.shareToTimeline(info, backInfo);
         });
     }
 }
