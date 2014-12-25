@@ -353,6 +353,8 @@ class Main extends egret.DisplayObjectContainer{
         moon.anchorX = moon.anchorY = 0.5;
         moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
         moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
+        var moonScale = this.getRandomNum(0.5, 1);
+        moon.scaleX = moon.scaleY = moonScale;
         this.addChildAt(moon, 5);
         this.m_currentMoon = moon;
         var moonAction = new MoonFadeAction(moon, 0.01, true);
@@ -410,7 +412,7 @@ class Main extends egret.DisplayObjectContainer{
         }
 
         var area: number = (maxX - minX) * (maxY - minY);
-        var targetArea: number = target.width * target.height;
+        var targetArea: number = Math.PI * target.width * target.scaleX * target.width * target.scaleX / 4;
         
         //center
         var targetPosX:number = target.x;
@@ -511,9 +513,10 @@ class Main extends egret.DisplayObjectContainer{
     private gameFinished(): void
     {
         this.m_drawLayer.touchEnabled = false;
-        var result: ResultPanel = new ResultPanel(this.m_score);
+        var result: ResultPanel = new ResultPanel(this.m_score, this.m_bestScore);
         this.m_uiStage.addElement(result);
-        result.addEventListener(RestartGameEvent.RESTART_GAME_EVENT, this.onStartGameEvent, this)
+        result.addEventListener(RestartGameEvent.RESTART_GAME_EVENT, this.onStartGameEvent, this);
+        this.shareToWeiXinTimeLine(this.bestScore);
     }
 
     private onEnterIntoBackground(event: egret.Event): void
@@ -544,5 +547,23 @@ class Main extends egret.DisplayObjectContainer{
     {
         //Game Over
         this.gameFinished();
+    }
+
+    private shareToWeiXinTimeLine(score: number, backFun: Function = null): void{
+        WeixinApi.ready(function (api: WeixinApi)
+        {
+            var info: WeixinShareInfo = new WeixinShareInfo();
+            info.title = "玩游戏,赢齐秦歌友会门票";
+            info.desc = "我的最高得分是" + String(score) + "个心, 敢来挑战吗?";
+            info.link = "http://fightingplane.github.io/drawhearts";
+            //info.imgUrl = "";
+
+            var backInfo: WeixinShareCallbackInfo = new WeixinShareCallbackInfo();
+            if (backFun != null)
+            {
+                backInfo.confirm = backFun;
+            }
+            api.shareToTimeline(info, backInfo);
+        });
     }
 }
