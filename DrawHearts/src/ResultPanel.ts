@@ -9,12 +9,15 @@
 class ResultPanel extends egret.gui.Group
 {
     private panel: egret.gui.Panel;
-    private m_score:number = 0;
-    public constructor(score:number)
+    private m_score: number = 0;
+    private m_bestScore: number = 0;
+    public constructor(score:number, bestScore:number)
     {
         super();
         this.m_score = score;
+        this.m_bestScore = bestScore;
     }
+
     public createChildren(): void
     {
         super.createChildren();
@@ -39,12 +42,22 @@ class ResultPanel extends egret.gui.Group
         winTip.anchorY = 0.5;
         winTip.x = this.panel.width * 0.5;
         winTip.y = this.panel.height * 0.4;
-        winTip.text = "分享游戏, 获得门票的概率越大";
+        winTip.text = "秀战绩, 获得门票的概率翻倍哦";
+        winTip.size = 20;
+        winTip.textColor = 0x000000;//black
+
+        var winTip: egret.gui.Label = new egret.gui.Label();
+        this.panel.addElement(winTip);
+        winTip.anchorX = 0.5;
+        winTip.anchorY = 0.5;
+        winTip.x = this.panel.width * 0.5;
+        winTip.y = this.panel.height * 0.5;
+        winTip.text = "点击右上角菜单, 赶快分享游戏呼叫小伙伴~~";
         winTip.size = 20;
         winTip.textColor = 0x000000;//black
 
         var shareBtn: egret.gui.Button = new egret.gui.Button();
-        shareBtn.label = "分享";
+        shareBtn.label = "秀战绩";
         shareBtn.anchorX = shareBtn.anchorY = 0.5;
         shareBtn.x = this.panel.width * 0.3;
         shareBtn.y = this.panel.height * 0.75;
@@ -61,12 +74,13 @@ class ResultPanel extends egret.gui.Group
         this.panel.addElement(tryAgainBtn);
         //this.panel.layout
         egret.gui.PopUpManager.addPopUp(this.panel, true, true);
-}
+    }
 
     private onShareEvent(evt: egret.TouchEvent): void
     {
         egret.Logger.info("On share button touched");
-        this.shareToWeiXinTimeLine();
+        var redirectUrl: string = "http://club.ixibo.cn/club/gyh/start.htm?score=" + String(this.m_bestScore);
+        window.location.replace(redirectUrl);
     }
 
     private onTryAgainEvent(evt: egret.TouchEvent):void
@@ -75,19 +89,5 @@ class ResultPanel extends egret.gui.Group
         egret.gui.PopUpManager.removePopUp(this.panel);
         var startEvt : RestartGameEvent = new RestartGameEvent(RestartGameEvent.RESTART_GAME_EVENT);
         this.dispatchEvent(startEvt);
-    }
-
-    private shareToWeiXinTimeLine(): void
-    {
-        WeixinApi.ready(function (api: WeixinApi){
-            alert("WeixinAPI Ready!!");
-
-            var info: WeixinShareInfo = new WeixinShareInfo();
-            info.title = "HelloEgret";
-            info.desc = "欢迎使用Egret";
-            info.link = "www.egret-labs.org";
-            //info.imgUrl = "";
-            api.shareToTimeline(info);
-        });
     }
 }
