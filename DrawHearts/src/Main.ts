@@ -35,7 +35,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_bestScoreLabel: egret.TextField = null;
     private b_soundStarted: boolean;
     private m_drawLayer: DrawLayer = null;
-    static ROUND_TIME : number = 10;//30;
+    static ROUND_TIME : number = 30;
     private m_timeLeft :number = 0;
     private m_timeLeftLabel :egret.TextField = null;
     private m_startBtn: egret.gui.Button = null;
@@ -452,7 +452,7 @@ class Main extends egret.DisplayObjectContainer{
 
         if (evt.m_target != null)
             this.removeChild(evt.m_target);
-        
+
         this.m_scoreLabel.text = String(this.m_score);
         if (this.m_score > this.m_bestScore){
             egret.Logger.info("new record generates");
