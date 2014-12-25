@@ -266,6 +266,7 @@ var egret;
          * @constant {string} egret.Event.ENTER_FRAME
          */
         Event.ENTER_FRAME = "enterFrame";
+        Event.FRAME_FINISHED = "frame_finished";
         /**
          * 主循环：开始渲染
          * @constant {string} egret.Event.RENDER

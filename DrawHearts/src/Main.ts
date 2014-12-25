@@ -25,21 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*class FrameFinishedEvent extends egret.Event
-{
-    public static FRAME_FINISHED: string = "FRAME_FINISHED";
-
-    public constructor(type: string, bubbles: boolean= false, cancelable: boolean= false)
-    {
-        super(type, bubbles, cancelable);
-    }
-}*/
-
 class Main extends egret.DisplayObjectContainer{
 
-    /**
-     * 加载进度界面
-     */
     private loadingView:LoadingUI;
     private bgSound: egret.Sound;
     private m_score: number = 0;
@@ -52,7 +39,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_timeLeft :number = 0;
     private m_timeLeftLabel :egret.TextField = null;
     private m_startBtn: egret.gui.Button = null;
-
+    private m_currentMoon: egret.Bitmap = null;
     public constructor()
     {
         super();
@@ -100,7 +87,6 @@ class Main extends egret.DisplayObjectContainer{
         RES.loadGroup("preload", 1);
         RES.loadGroup("theme_preload", 1);
         RES.loadGroup("soundload", 0);
-
     }
     /**
      * preload资源组加载完成
@@ -266,6 +252,7 @@ class Main extends egret.DisplayObjectContainer{
         this.m_drawLayer.x = stageW / 2;
         this.m_drawLayer.y = stageH / 2;
         this.addChildAt(this.m_drawLayer, 7);
+        this.m_drawLayer.touchEnabled = false;
 
         //this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
@@ -365,7 +352,7 @@ class Main extends egret.DisplayObjectContainer{
         moon.x = this.getRandomNum(stageW * 0.4, stageW * 0.8);
         moon.y = this.getRandomNum(stageH * 0.15, stageH * 0.4);
         this.addChildAt(moon, 5);
-
+        this.m_currentMoon = moon;
         var moonAction = new MoonFadeAction(moon, 0.01, true);
         moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
     }
@@ -394,7 +381,7 @@ class Main extends egret.DisplayObjectContainer{
         return ret;
     }
 
-    private checkScore(target:egret.Bitmap, positionX:Array<number>, positionY:Array<number>): void
+    private checkScore(target: egret.Bitmap, positionX: Array<number>, positionY: Array<number>): void
     {
         if (positionX == null || positionY == null)
             return;
@@ -416,8 +403,8 @@ class Main extends egret.DisplayObjectContainer{
         }
 
         for (var i = 0; i < positionY.length; i++){
-            minY = Math.min(minX, positionX[i]);
-            maxY = Math.max(maxX, positionX[i]);
+            minY = Math.min(minY, positionY[i]);
+            maxY = Math.max(maxY, positionY[i]);
         }
 
         var area: number = (maxX - minX) * (maxY - minY);
@@ -435,16 +422,37 @@ class Main extends egret.DisplayObjectContainer{
         {
             egret.Logger.info("Got one score");
             //show an heart 
-            this.addOneScore();
+            this.addOneScore(targetPosX, targetPosY);
         }
     }
 
-    private addOneScore(): void
+    private addOneScore(posX:number, posY:number): void
+    {        
+        //create a heaer and move to score heart
+        var heart: egret.Bitmap = this.createBitmapByName("heartImage");
+        this.addChildAt(heart, 6);
+        heart.anchorX = heart.anchorY = 0.5;
+        heart.x = posX;
+        heart.y = posY;
+        //run action
+        var stageW: number = this.stage.stageWidth;
+        var stageH: number = this.stage.stageHeight;
+        var heartAction: HeartAction = new HeartAction(heart, stageW * 0.85, stageH * 0.15, 0.5, true);
+        heartAction.addEventListener(HeartActionFinished.HEART_ACTION_DONE, this.onHeartMoveDone, this);
+    }
+
+    private onHeartMoveDone(evt: HeartActionFinished): void
     {
+        var action = evt.target;
+        if (action)
+            action.removeEventListener(HeartActionFinished.HEART_ACTION_DONE, this.onHeartMoveDone, this);
+
+        if (evt.m_target != null)
+            this.removeChild(evt.m_target);
+
         this.m_score = this.m_score + 1;
         this.m_scoreLabel.text = String(this.m_score);
-        if (this.m_score > this.m_bestScore)
-        {
+        if (this.m_score > this.m_bestScore){
             egret.Logger.info("new record generates");
             this.m_bestScore = this.m_score;
             this.m_bestScoreLabel.text = String(this.m_bestScore);
@@ -473,6 +481,7 @@ class Main extends egret.DisplayObjectContainer{
     private startGame() :void
     {
         //start timer
+        this.m_drawLayer.touchEnabled = true;
         this.m_timeLeft = Main.ROUND_TIME;
         this.m_timeLeftLabel.text = String(this.m_timeLeft);
         var timer: egret.Timer = new egret.Timer(1000, Main.ROUND_TIME);
@@ -489,15 +498,18 @@ class Main extends egret.DisplayObjectContainer{
 
     private gameFinished(): void
     {
+//        this.m_drawLayer.touchEnabled = false;
+/*        var result: ResultPanel = new ResultPanel;
+        this.addChild(result);
+        */
         //popup score and share btn
-
+        this.shareToWeiXinTimeLine();
     }
 
     private shareToWeiXinTimeLine(): void
     {
         //TODO:
-        WeixinApi.ready(function (api: WeixinApi)
-        {
+        WeixinApi.ready(function (api: WeixinApi){
             alert("WeixinAPI Ready!!");
 
             var info: WeixinShareInfo = new WeixinShareInfo();
@@ -506,7 +518,7 @@ class Main extends egret.DisplayObjectContainer{
             info.link = "www.egret-labs.org";
             //info.imgUrl = "";
             api.shareToTimeline(info);
-        })
+        });
     }
 
     private onEnterIntoBackground(event: egret.Event): void
