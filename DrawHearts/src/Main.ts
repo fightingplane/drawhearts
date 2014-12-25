@@ -40,6 +40,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_timeLeftLabel :egret.TextField = null;
     private m_startBtn: egret.gui.Button = null;
     private m_currentMoon: egret.Bitmap = null;
+    private m_uiStage:egret.gui.UIStage = null;
     public constructor()
     {
         super();
@@ -146,6 +147,8 @@ class Main extends egret.DisplayObjectContainer{
 
         this.m_tipTextContainer = textContainer;
 
+        this.m_uiStage = new egret.gui.UIStage;
+        this.addChild(this.m_uiStage);
         //create three clouds
         this.createOneCloud();
         this.createOneCloud();
@@ -254,7 +257,6 @@ class Main extends egret.DisplayObjectContainer{
         this.addChildAt(this.m_drawLayer, 7);
         this.m_drawLayer.touchEnabled = false;
 
-        //this.shareToWeiXinTimeLine();
         //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
         RES.getResAsync("description", this.startAnimation, this);
         this.touchEnabled = true;
@@ -428,7 +430,8 @@ class Main extends egret.DisplayObjectContainer{
 
     private addOneScore(posX:number, posY:number): void
     {        
-        //create a heaer and move to score heart
+        //create a heart and move to score heart
+        this.m_score = this.m_score + 1;//add the score and show it later
         var heart: egret.Bitmap = this.createBitmapByName("heartImage");
         this.addChildAt(heart, 6);
         heart.anchorX = heart.anchorY = 0.5;
@@ -450,7 +453,6 @@ class Main extends egret.DisplayObjectContainer{
         if (evt.m_target != null)
             this.removeChild(evt.m_target);
 
-        this.m_score = this.m_score + 1;
         this.m_scoreLabel.text = String(this.m_score);
         if (this.m_score > this.m_bestScore){
             egret.Logger.info("new record generates");
@@ -478,6 +480,16 @@ class Main extends egret.DisplayObjectContainer{
         this.startGame();
     }
 
+    private onStartGameEvent(evt:RestartGameEvent) :void
+    {
+        egret.Logger.info("Got restart game event");
+        //clean up current score
+        this.m_score = 0;
+        this.m_scoreLabel.text = "0";
+        this.m_uiStage.removeEventListener(RestartGameEvent.RESTART_GAME_EVENT, this.onStartGameEvent, this);
+        this.startGame();
+    }
+
     private startGame() :void
     {
         //start timer
@@ -498,27 +510,10 @@ class Main extends egret.DisplayObjectContainer{
 
     private gameFinished(): void
     {
-//        this.m_drawLayer.touchEnabled = false;
-/*        var result: ResultPanel = new ResultPanel;
-        this.addChild(result);
-        */
-        //popup score and share btn
-        this.shareToWeiXinTimeLine();
-    }
-
-    private shareToWeiXinTimeLine(): void
-    {
-        //TODO:
-        WeixinApi.ready(function (api: WeixinApi){
-            alert("WeixinAPI Ready!!");
-
-            var info: WeixinShareInfo = new WeixinShareInfo();
-            info.title = "HelloEgret";
-            info.desc = "欢迎使用Egret";
-            info.link = "www.egret-labs.org";
-            //info.imgUrl = "";
-            api.shareToTimeline(info);
-        });
+        this.m_drawLayer.touchEnabled = false;
+        var result: ResultPanel = new ResultPanel(this.m_score);
+        this.m_uiStage.addElement(result);
+        result.addEventListener(RestartGameEvent.RESTART_GAME_EVENT, this.onStartGameEvent, this)
     }
 
     private onEnterIntoBackground(event: egret.Event): void
