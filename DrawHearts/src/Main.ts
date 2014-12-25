@@ -357,7 +357,7 @@ class Main extends egret.DisplayObjectContainer{
         moon.scaleX = moon.scaleY = moonScale;
         this.addChildAt(moon, 5);
         this.m_currentMoon = moon;
-        var moonAction = new MoonFadeAction(moon, 0.01, true);
+        var moonAction = new MoonFadeAction(moon, 0.04, true);
         moonAction.addEventListener(MoonFadeFinishEvent.MOON_FADE_FINISH, this.onMoonFaded, this);
     }
 

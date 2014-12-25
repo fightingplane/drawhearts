@@ -2,7 +2,7 @@
 
     private _texture: egret.Bitmap;
     private _walkStep: number;
-
+    private _fading: boolean = false;
     public constructor(cloud: egret.Bitmap, walkStep: number, isAuto: boolean) {
         super();
         this._texture = cloud;
@@ -14,8 +14,34 @@
 
     private startFade(): void {
         this._texture.alpha = 0;
-        this._texture.addEventListener(egret.Event.ENTER_FRAME, this.show, this);
-        
+        this._fading = false;
+        var timer: egret.Timer = new egret.Timer(40, 50);
+        timer.addEventListener(egret.TimerEvent.TIMER, this.onTimerEvent, this);
+        timer.addEventListener(egret.TimerEvent.TIMER_COMPLETE, this.onTimeUp, this);
+        timer.start();
+
+       // this._texture.addEventListener(egret.Event.ENTER_FRAME, this.show, this);      
+    }
+
+    private onTimerEvent(evt: egret.TimerEvent): void
+    {
+        if (!this._fading)
+{
+            this._texture.alpha += this._walkStep;
+
+            if (this._texture.alpha >= 1)
+            {
+                this._fading = true;
+            }
+        } else
+        {
+            this._texture.alpha -= this._walkStep;
+        }
+    }
+
+    private onTimeUp(evt: egret.TimerEvent): void
+    {
+        this.onActionDone();
     }
 
     private show(): void
