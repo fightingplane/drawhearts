@@ -555,7 +555,7 @@ class Main extends egret.DisplayObjectContainer{
             var info: WeixinShareInfo = new WeixinShareInfo();
             info.title = "玩游戏,赢齐秦歌友会门票";
             info.desc = "我的最高得分是" + String(score) + "个心, 敢来挑战吗?";
-            info.link = "http://fightingplane.github.io/drawhearts";
+            info.link = "http://game.bestbole.com";
             //info.imgUrl = "";
 
             var backInfo: WeixinShareCallbackInfo = new WeixinShareCallbackInfo();
