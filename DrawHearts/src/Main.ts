@@ -35,7 +35,7 @@ class Main extends egret.DisplayObjectContainer{
     private m_bestScoreLabel: egret.TextField = null;
     private b_soundStarted: boolean;
     private m_drawLayer: DrawLayer = null;
-    static ROUND_TIME : number = 30;
+    static ROUND_TIME : number = 60;
     private m_timeLeft :number = 0;
     private m_timeLeftLabel :egret.TextField = null;
     private m_startBtn: egret.gui.Button = null;
